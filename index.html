@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcadores de IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151b3d;
+            --accent-primary: #00ffb9;
+            --accent-secondary: #7b2cbf;
+            --text-primary: #f0f4f8;
+            --text-secondary: #a8b2c1;
+            --card-bg: rgba(21, 27, 61, 0.6);
+            --border-color: rgba(0, 255, 185, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .background-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(123, 44, 191, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 185, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.05); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 18px 50px 18px 24px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-family: 'Work Sans', sans-serif;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 30px rgba(0, 255, 185, 0.2);
+        }
+
+        #searchInput::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-primary);
+            font-size: 1.2rem;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        .category-btn {
+            padding: 12px 28px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 185, 0.3);
+        }
+
+        .bookmarks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .bookmark-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out both;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bookmark-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 185, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .bookmark-card:hover::before {
+            left: 100%;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bookmark-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 20px 60px rgba(0, 255, 185, 0.15);
+        }
+
+        .bookmark-category {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(0, 255, 185, 0.1);
+            border: 1px solid var(--accent-primary);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bookmark-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .bookmark-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .bookmark-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-link:hover {
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .bookmark-link::after {
+            content: '→';
+            margin-left: 8px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .bookmark-link:hover::after {
+            margin-left: 12px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .add-bookmark-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 50%;
+            color: var(--bg-primary);
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(0, 255, 185, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .add-bookmark-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 15px 50px rgba(0, 255, 185, 0.6);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 60px;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-btn:hover,
+        .lang-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        @media (max-width: 768px) {
+            .bookmarks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .add-bookmark-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effect"></div>
+
+    <div class="language-selector">
+        <button class="lang-btn active" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Marcadores de IA</h1>
+            <p class="subtitle">Tu colección de las mejores herramientas y recursos de inteligencia artificial. Todas son gratuitas o con limites, ninguna es 100% de pago.</p>
+        </header>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar marcadores...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <div class="categories">
+            <button class="category-btn active" data-category="all">Todos</button>
+            <button class="category-btn" data-category="General">General</button>
+            <button class="category-btn" data-category="Código">Código</button>
+            <button class="category-btn" data-category="Desarrollo Web">Desarrollo Web</button>
+            <button class="category-btn" data-category="Imagen">Imagen</button>
+            <button class="category-btn" data-category="Música">Música</button>
+            <button class="category-btn" data-category="Video">Video</button>
+            <button class="category-btn" data-category="Voz">Voz</button>
+            <button class="category-btn" data-category="Humanizador">Humanizador</button>
+            <button class="category-btn" data-category="Muchos en uno">Muchos en uno</button>
+            <button class="category-btn" data-category="Presentaciones">Presentaciones</button>
+            <button class="category-btn" data-category="Viajes">Viajes</button>
+        </div>
+
+        <div class="bookmarks-grid" id="bookmarksGrid"></div>
+        <div class="no-results" id="noResults" style="display: none;">
+            No se encontraron marcadores que coincidan con tu búsqueda.
+        </div>
+
+        <button class="add-bookmark-btn" title="Agregar marcador">+</button>
+    </div>
+
+    <footer>
+        <p>Marcadores de IA - 2026 | made by iamLudok</p>
+    </footer>
+
+    <script>
+        // Traducciones
+        const translations = {
+            es: {
+                title: "Marcadores de IA",
+                subtitle: "Tu colección de las mejores herramientas y recursos de inteligencia artificial. Todas son gratuitas o con limites, ninguna es 100% de pago.",
+                searchPlaceholder: "Buscar marcadores...",
+                noResults: "No se encontraron marcadores que coincidan con tu búsqueda.",
+                visitSite: "Visitar sitio",
+                addBookmark: "Agregar marcador",
+                addBookmarkAlert: "Función para agregar marcadores próximamente. Por ahora, edita el array \"bookmarks\" en el código JavaScript.",
+                footer: "Marcadores de IA - 2026 | made by iamLudok",
+                categories: {
+                    all: "Todos",
+                    "Desarrollo Web": "Desarrollo Web",
+                    "Código": "Código",
+                    "General": "General",
+                    "Imagen": "Imagen",
+                    "Música": "Música",
+                    "Video": "Video",
+                    "Voz": "Voz",
+                    "Muchos en uno": "Muchos en uno",
+                    "Presentaciones": "Presentaciones",
+                    "Humanizador": "Humanizador",
+                    "Viajes": "Viajes"
+                }
+            },
+            en: {
+                title: "AI Bookmarks",
+                subtitle: "Your collection of the best artificial intelligence tools and resources. All are free or have limits, none are 100% paid.",
+                searchPlaceholder: "Search bookmarks...",
+                noResults: "No bookmarks found matching your search.",
+                visitSite: "Visit site",
+                addBookmark: "Add bookmark",
+                addBookmarkAlert: "Add bookmarks feature coming soon. For now, edit the \"bookmarks\" array in the JavaScript code.",
+                footer: "AI Bookmarks - 2026 | made by iamLudok",
+                categories: {
+                    all: "All",
+                    "Desarrollo Web": "Web Development",
+                    "Código": "Code",
+                    "General": "General",
+                    "Imagen": "Image",
+                    "Música": "Music",
+                    "Video": "Video",
+                    "Voz": "Voice",
+                    "Muchos en uno": "Many in one",
+                    "Presentaciones": "Presentations",
+                    "Humanizador": "Humanizer",
+                    "Viajes": "Travel"
+                }
+            }
+        };
+
+        // Descripciones por idioma
+        const descriptions = {
+            es: {
+                "Lovable": "Plataforma para crear aplicaciones web mediante vibe coding.",
+                "Bubble": "Plataforma para crear aplicaciones web mediante vibe coding.",
+                "v0": "Plataforma para crear aplicaciones web mediante vibe coding.",
+                "Bolt": "Plataforma para crear aplicaciones web mediante vibe coding.",
+                "Narakeet": "Herramienta para crear videos y narración de texto a voz de forma automatizada.",
+                "Claude": "El mejor asistente para programación.",
+                "ChatGPT": "El mejor asistente para uso general.",
+                "Sora": "Especializado en video e imágenes realistas de alta calidad.",
+                "Suno": "El mejor para crear canciones a partir de instrucciones o hasta letras.",
+                "Udio": "Bueno para crear canciones.",
+                "Runway": "Famoso para creación de clips cortos y efectos visuales impresionantes.",
+                "Pika": "Ideal para videos cortos con estilo creativo y efectos únicos.",
+                "Perplexity": "Responde con información actualizada y fuentes fiables en tiempo real.",
+                "ChatHub": "Reúne diferentes modelos de IA en una sola plataforma para comparar.",
+                "LMArena": "Permite probar y comparar modelos de texto en vivo y en tiempo real.",
+                "Google AI Studio": "Herramienta oficial de Google para usar sus modelos de IA como Gemini o Nano Banana.",
+                "HuggingFace Spaces": "Para probar miles de modelos de IA en un mismo sitio de forma gratuita.",
+                "Tenorshare AI": "Hace que los textos generados por IA suenen más naturales y humanos.",
+                "Gamma": "Genera presentaciones a partir de texto, con diseños interactivos y modernos.",
+                "Visme": "Para crear presentaciones profesionales y material visual impactante.",
+                "Vacay Chatbot": "Bueno para planificar viajes.",
+                "GuideGeek": "Bueno para planificar viajes.",
+                "Curiosio": "Diseña road trips únicos y fuera de lo común para aventureros."
+            },
+            en: {
+                "Lovable": "Platform for creating web applications using vibe coding.",
+                "Bubble": "Platform for creating web applications using vibe coding.",
+                "v0": "Platform for creating web applications using vibe coding.",
+                "Bolt": "Platform for creating web applications using vibe coding.",
+                "Narakeet": "Tool for automated video creation and text-to-speech narration.",
+                "Claude": "The best assistant for programming.",
+                "ChatGPT": "The best assistant for general use.",
+                "Sora": "Specialized in high-quality realistic video and images.",
+                "Suno": "The best for creating songs from instructions or even lyrics.",
+                "Udio": "Good for creating songs.",
+                "Runway": "Famous for creating short clips and impressive visual effects.",
+                "Pika": "Ideal for short videos with creative style and unique effects.",
+                "Perplexity": "Responds with up-to-date information and reliable sources in real time.",
+                "ChatHub": "Brings together different AI models in one platform to compare.",
+                "LMArena": "Test and compare text models live and in real time.",
+                "Google AI Studio": "Google's official tool to use their AI models like Gemini or Nano Banana.",
+                "HuggingFace Spaces": "Test thousands of AI models in one place for free.",
+                "Tenorshare AI": "Makes AI-generated texts sound more natural and human.",
+                "Gamma": "Generate presentations from text with interactive and modern designs.",
+                "Visme": "Create professional presentations and impactful visual material.",
+                "Vacay Chatbot": "Good for planning trips.",
+                "GuideGeek": "Good for planning trips.",
+                "Curiosio": "Design unique and off-the-beaten-path road trips for adventurers."
+            }
+        };
+
+        let currentLang = 'es';
+
+        // Datos de marcadores de IA (las descripciones están en el objeto 'descriptions')
+        const bookmarks = [
+            // General
+            { title: "ChatGPT", url: "https://chat.openai.com", category: "General" },
+            { title: "Perplexity", url: "https://perplexity.ai", category: "General" },
+            // Código
+            { title: "Claude", url: "https://claude.ai", category: "Código" },
+            // Desarrollo Web
+            { title: "Lovable", url: "https://lovable.dev", category: "Desarrollo Web" },
+            { title: "Bubble", url: "https://bubble.io", category: "Desarrollo Web" },
+            { title: "v0", url: "https://v0.dev", category: "Desarrollo Web" },
+            { title: "Bolt", url: "https://bolt.new", category: "Desarrollo Web" },
+            // Imagen
+            { title: "Sora", url: "https://openai.com/sora", category: "Imagen" },
+            // Música
+            { title: "Suno", url: "https://suno.ai", category: "Música" },
+            { title: "Udio", url: "https://udio.com", category: "Música" },
+            // Video
+            { title: "Runway", url: "https://runwayml.com", category: "Video" },
+            { title: "Pika", url: "https://pika.art", category: "Video" },
+            { title: "Narakeet", url: "https://narakeet.com", category: "Video" },
+            { title: "Sora", url: "https://openai.com/sora", category: "Video" },
+            // Muchos en uno
+            { title: "ChatHub", url: "https://app.chathub.gg/", category: "Muchos en uno" },
+            { title: "LMArena", url: "https://lmarena.ai", category: "Muchos en uno" },
+            { title: "Google AI Studio", url: "https://aistudio.google.com", category: "Muchos en uno" },
+            { title: "HuggingFace Spaces", url: "https://huggingface.co/spaces", category: "Muchos en uno" },
+            // Presentaciones
+            { title: "Gamma", url: "https://gamma.app", category: "Presentaciones" },
+            { title: "Visme", url: "https://visme.co", category: "Presentaciones" },
+            // Humanizador
+            { title: "Tenorshare AI", url: "https://ai.tenorshare.com/products/ai-bypass", category: "Humanizador" },
+            // Voz
+            { title: "Narakeet", url: "https://narakeet.com", category: "Voz" },
+            // Viajes
+            { title: "Vacay Chatbot", url: "https://usevacay.com", category: "Viajes" },
+            { title: "GuideGeek", url: "https://guidegeek.com", category: "Viajes" },
+            { title: "Curiosio", url: "https://curiosio.com", category: "Viajes" }
+        ];
+
+        let currentCategory = 'all';
+        let searchTerm = '';
+
+        function getDescription(bookmark) {
+            return descriptions[currentLang][bookmark.title] || bookmark.title;
+        }
+
+        function getCategoryDisplay(category) {
+            return translations[currentLang].categories[category] || category;
+        }
+
+        function updateUI() {
+            const t = translations[currentLang];
+
+            document.querySelector('h1').textContent = t.title;
+            document.querySelector('.subtitle').textContent = t.subtitle;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            document.getElementById('noResults').textContent = t.noResults;
+            document.querySelector('.add-bookmark-btn').title = t.addBookmark;
+            document.querySelector('footer p').textContent = t.footer;
+            document.documentElement.lang = currentLang;
+
+            // Actualizar botones de categoría
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                const cat = btn.dataset.category;
+                btn.textContent = t.categories[cat] || cat;
+            });
+
+            renderBookmarks();
+        }
+
+        function renderBookmarks() {
+            const grid = document.getElementById('bookmarksGrid');
+            const noResults = document.getElementById('noResults');
+            const t = translations[currentLang];
+
+            const filtered = bookmarks.filter(bookmark => {
+                const matchesCategory = currentCategory === 'all' || bookmark.category === currentCategory;
+                const description = getDescription(bookmark);
+                const matchesSearch = bookmark.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    description.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            grid.innerHTML = filtered.map((bookmark, index) => `
+                <div class="bookmark-card" style="animation-delay: ${index * 0.1}s">
+                    <span class="bookmark-category">${getCategoryDisplay(bookmark.category)}</span>
+                    <h3 class="bookmark-title">${bookmark.title}</h3>
+                    <p class="bookmark-description">${getDescription(bookmark)}</p>
+                    <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                        ${t.visitSite}
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        // Event listeners
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderBookmarks();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderBookmarks();
+        });
+
+        document.querySelector('.add-bookmark-btn').addEventListener('click', () => {
+            alert(translations[currentLang].addBookmarkAlert);
+        });
+
+        // Event listener para idioma
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLang = btn.dataset.lang;
+                updateUI();
+            });
+        });
+
+        // Render inicial
+        renderBookmarks();
+    </script>
+</body>
+</html>
