@@ -222,24 +222,74 @@
             box-shadow: 0 20px 60px rgba(0, 255, 185, 0.15);
         }
 
+        .bookmark-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .bookmark-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .bookmark-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
         .bookmark-category {
             display: inline-block;
-            padding: 6px 14px;
+            padding: 4px 10px;
             background: rgba(0, 255, 185, 0.1);
             border: 1px solid var(--accent-primary);
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--accent-primary);
-            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-category:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .bookmark-pricing {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
+        .bookmark-pricing.free {
+            background: rgba(46, 204, 113, 0.15);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        .bookmark-pricing.freemium {
+            background: rgba(241, 196, 15, 0.15);
+            border: 1px solid #f1c40f;
+            color: #f1c40f;
+        }
+
         .bookmark-title {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin: 0;
             color: var(--text-primary);
         }
 
@@ -280,28 +330,6 @@
             padding: 60px 20px;
             color: var(--text-secondary);
             font-size: 1.1rem;
-        }
-
-        .add-bookmark-btn {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            border-radius: 50%;
-            color: var(--bg-primary);
-            font-size: 2rem;
-            cursor: pointer;
-            box-shadow: 0 10px 40px rgba(0, 255, 185, 0.4);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
-
-        .add-bookmark-btn:hover {
-            transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 15px 50px rgba(0, 255, 185, 0.6);
         }
 
         footer {
@@ -346,11 +374,6 @@
             .bookmarks-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .add-bookmark-btn {
-                bottom: 20px;
-                right: 20px;
-            }
         }
     </style>
 </head>
@@ -375,27 +398,13 @@
             </div>
         </div>
 
-        <div class="categories">
-            <button class="category-btn active" data-category="all">Todos</button>
-            <button class="category-btn" data-category="General">General</button>
-            <button class="category-btn" data-category="Código">Código</button>
-            <button class="category-btn" data-category="Desarrollo Web">Desarrollo Web</button>
-            <button class="category-btn" data-category="Imagen">Imagen</button>
-            <button class="category-btn" data-category="Música">Música</button>
-            <button class="category-btn" data-category="Video">Video</button>
-            <button class="category-btn" data-category="Voz">Voz</button>
-            <button class="category-btn" data-category="Humanizador">Humanizador</button>
-            <button class="category-btn" data-category="Muchos en uno">Muchos en uno</button>
-            <button class="category-btn" data-category="Presentaciones">Presentaciones</button>
-            <button class="category-btn" data-category="Viajes">Viajes</button>
-        </div>
+        <div class="categories" id="categories"></div>
 
         <div class="bookmarks-grid" id="bookmarksGrid"></div>
         <div class="no-results" id="noResults" style="display: none;">
             No se encontraron marcadores que coincidan con tu búsqueda.
         </div>
 
-        <button class="add-bookmark-btn" title="Agregar marcador">+</button>
     </div>
 
     <footer>
@@ -403,250 +412,132 @@
     </footer>
 
     <script>
-        // Traducciones
-        const translations = {
+        const CATEGORIES = ['general', 'code', 'webdev', 'image', 'music', 'video', 'voice', 'humanizer', 'allinone', 'presentations', 'travel'];
+
+        const i18n = {
             es: {
                 title: "Marcadores de IA",
                 subtitle: "Tu colección de las mejores herramientas y recursos de inteligencia artificial. Todas son gratuitas o con limites, ninguna es 100% de pago.",
-                searchPlaceholder: "Buscar marcadores...",
+                search: "Buscar marcadores...",
                 noResults: "No se encontraron marcadores que coincidan con tu búsqueda.",
-                visitSite: "Visitar sitio",
-                addBookmark: "Agregar marcador",
-                addBookmarkAlert: "Función para agregar marcadores próximamente. Por ahora, edita el array \"bookmarks\" en el código JavaScript.",
+                visit: "Visitar sitio",
                 footer: "Marcadores de IA - 2026 | made by iamLudok",
-                categories: {
-                    all: "Todos",
-                    "Desarrollo Web": "Desarrollo Web",
-                    "Código": "Código",
-                    "General": "General",
-                    "Imagen": "Imagen",
-                    "Música": "Música",
-                    "Video": "Video",
-                    "Voz": "Voz",
-                    "Muchos en uno": "Muchos en uno",
-                    "Presentaciones": "Presentaciones",
-                    "Humanizador": "Humanizador",
-                    "Viajes": "Viajes"
-                }
+                cat: { all: "Todos", general: "General", code: "Código", webdev: "Desarrollo Web", image: "Imagen", music: "Música", video: "Video", voice: "Voz", humanizer: "Humanizador", allinone: "Muchos en uno", presentations: "Presentaciones", travel: "Viajes" },
+                pricing: { free: "Gratis", freemium: "Limitado" }
             },
             en: {
                 title: "AI Bookmarks",
                 subtitle: "Your collection of the best artificial intelligence tools and resources. All are free or have limits, none are 100% paid.",
-                searchPlaceholder: "Search bookmarks...",
+                search: "Search bookmarks...",
                 noResults: "No bookmarks found matching your search.",
-                visitSite: "Visit site",
-                addBookmark: "Add bookmark",
-                addBookmarkAlert: "Add bookmarks feature coming soon. For now, edit the \"bookmarks\" array in the JavaScript code.",
+                visit: "Visit site",
                 footer: "AI Bookmarks - 2026 | made by iamLudok",
-                categories: {
-                    all: "All",
-                    "Desarrollo Web": "Web Development",
-                    "Código": "Code",
-                    "General": "General",
-                    "Imagen": "Image",
-                    "Música": "Music",
-                    "Video": "Video",
-                    "Voz": "Voice",
-                    "Muchos en uno": "Many in one",
-                    "Presentaciones": "Presentations",
-                    "Humanizador": "Humanizer",
-                    "Viajes": "Travel"
-                }
+                cat: { all: "All", general: "General", code: "Code", webdev: "Web Development", image: "Image", music: "Music", video: "Video", voice: "Voice", humanizer: "Humanizer", allinone: "Many in one", presentations: "Presentations", travel: "Travel" },
+                pricing: { free: "Free", freemium: "Limited" }
             }
         };
 
-        // Descripciones por idioma
-        const descriptions = {
-            es: {
-                "Lovable": "Plataforma para crear aplicaciones web mediante vibe coding.",
-                "Bubble": "Plataforma para crear aplicaciones web mediante vibe coding.",
-                "v0": "Plataforma para crear aplicaciones web mediante vibe coding.",
-                "Bolt": "Plataforma para crear aplicaciones web mediante vibe coding.",
-                "Narakeet": "Herramienta para crear videos y narración de texto a voz de forma automatizada.",
-                "Claude": "El mejor asistente para programación.",
-                "ChatGPT": "El mejor asistente para uso general.",
-                "Sora": "Especializado en video e imágenes realistas de alta calidad.",
-                "Suno": "El mejor para crear canciones a partir de instrucciones o hasta letras.",
-                "Udio": "Bueno para crear canciones.",
-                "Runway": "Famoso para creación de clips cortos y efectos visuales impresionantes.",
-                "Pika": "Ideal para videos cortos con estilo creativo y efectos únicos.",
-                "Perplexity": "Responde con información actualizada y fuentes fiables en tiempo real.",
-                "ChatHub": "Reúne diferentes modelos de IA en una sola plataforma para comparar.",
-                "LMArena": "Permite probar y comparar modelos de texto en vivo y en tiempo real.",
-                "Google AI Studio": "Herramienta oficial de Google para usar sus modelos de IA como Gemini o Nano Banana.",
-                "HuggingFace Spaces": "Para probar miles de modelos de IA en un mismo sitio de forma gratuita.",
-                "Tenorshare AI": "Hace que los textos generados por IA suenen más naturales y humanos.",
-                "Gamma": "Genera presentaciones a partir de texto, con diseños interactivos y modernos.",
-                "Visme": "Para crear presentaciones profesionales y material visual impactante.",
-                "Vacay Chatbot": "Bueno para planificar viajes.",
-                "GuideGeek": "Bueno para planificar viajes.",
-                "Curiosio": "Diseña road trips únicos y fuera de lo común para aventureros."
-            },
-            en: {
-                "Lovable": "Platform for creating web applications using vibe coding.",
-                "Bubble": "Platform for creating web applications using vibe coding.",
-                "v0": "Platform for creating web applications using vibe coding.",
-                "Bolt": "Platform for creating web applications using vibe coding.",
-                "Narakeet": "Tool for automated video creation and text-to-speech narration.",
-                "Claude": "The best assistant for programming.",
-                "ChatGPT": "The best assistant for general use.",
-                "Sora": "Specialized in high-quality realistic video and images.",
-                "Suno": "The best for creating songs from instructions or even lyrics.",
-                "Udio": "Good for creating songs.",
-                "Runway": "Famous for creating short clips and impressive visual effects.",
-                "Pika": "Ideal for short videos with creative style and unique effects.",
-                "Perplexity": "Responds with up-to-date information and reliable sources in real time.",
-                "ChatHub": "Brings together different AI models in one platform to compare.",
-                "LMArena": "Test and compare text models live and in real time.",
-                "Google AI Studio": "Google's official tool to use their AI models like Gemini or Nano Banana.",
-                "HuggingFace Spaces": "Test thousands of AI models in one place for free.",
-                "Tenorshare AI": "Makes AI-generated texts sound more natural and human.",
-                "Gamma": "Generate presentations from text with interactive and modern designs.",
-                "Visme": "Create professional presentations and impactful visual material.",
-                "Vacay Chatbot": "Good for planning trips.",
-                "GuideGeek": "Good for planning trips.",
-                "Curiosio": "Design unique and off-the-beaten-path road trips for adventurers."
-            }
-        };
-
-        let currentLang = 'es';
-
-        // Datos de marcadores de IA (las descripciones están en el objeto 'descriptions')
         const bookmarks = [
-            // General
-            { title: "ChatGPT", url: "https://chat.openai.com", category: "General" },
-            { title: "Perplexity", url: "https://perplexity.ai", category: "General" },
-            // Código
-            { title: "Claude", url: "https://claude.ai", category: "Código" },
-            // Desarrollo Web
-            { title: "Lovable", url: "https://lovable.dev", category: "Desarrollo Web" },
-            { title: "Bubble", url: "https://bubble.io", category: "Desarrollo Web" },
-            { title: "v0", url: "https://v0.dev", category: "Desarrollo Web" },
-            { title: "Bolt", url: "https://bolt.new", category: "Desarrollo Web" },
-            // Imagen
-            { title: "Sora", url: "https://openai.com/sora", category: "Imagen" },
-            // Música
-            { title: "Suno", url: "https://suno.ai", category: "Música" },
-            { title: "Udio", url: "https://udio.com", category: "Música" },
-            // Video
-            { title: "Runway", url: "https://runwayml.com", category: "Video" },
-            { title: "Pika", url: "https://pika.art", category: "Video" },
-            { title: "Narakeet", url: "https://narakeet.com", category: "Video" },
-            { title: "Sora", url: "https://openai.com/sora", category: "Video" },
-            // Muchos en uno
-            { title: "ChatHub", url: "https://app.chathub.gg/", category: "Muchos en uno" },
-            { title: "LMArena", url: "https://lmarena.ai", category: "Muchos en uno" },
-            { title: "Google AI Studio", url: "https://aistudio.google.com", category: "Muchos en uno" },
-            { title: "HuggingFace Spaces", url: "https://huggingface.co/spaces", category: "Muchos en uno" },
-            // Presentaciones
-            { title: "Gamma", url: "https://gamma.app", category: "Presentaciones" },
-            { title: "Visme", url: "https://visme.co", category: "Presentaciones" },
-            // Humanizador
-            { title: "Tenorshare AI", url: "https://ai.tenorshare.com/products/ai-bypass", category: "Humanizador" },
-            // Voz
-            { title: "Narakeet", url: "https://narakeet.com", category: "Voz" },
-            // Viajes
-            { title: "Vacay Chatbot", url: "https://usevacay.com", category: "Viajes" },
-            { title: "GuideGeek", url: "https://guidegeek.com", category: "Viajes" },
-            { title: "Curiosio", url: "https://curiosio.com", category: "Viajes" }
+            { title: "ChatGPT", url: "https://chat.openai.com", cat: ["general"], pricing: "freemium", desc: { es: "El clásico. Perfecto para cualquier cosa: escribir, investigar, resolver dudas. El más versátil.", en: "The classic. Perfect for anything: writing, research, solving questions. The most versatile." }},
+            { title: "Perplexity", url: "https://perplexity.ai", cat: ["general"], pricing: "freemium", desc: { es: "Como Google pero te da la respuesta directa con fuentes. Ideal para investigar rápido.", en: "Like Google but gives you the direct answer with sources. Ideal for quick research." }},
+            { title: "Claude", url: "https://claude.ai", cat: ["code"], pricing: "freemium", desc: { es: "Mi favorito para programar. Entiende el contexto mejor que nadie y no se pierde en proyectos grandes.", en: "My favorite for coding. Understands context better than anyone and doesn't get lost in big projects." }},
+            { title: "Lovable", url: "https://lovable.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "El más fácil para empezar. En minutos tienes algo funcional y bonito sin tocar código.", en: "In minutes you have something functional and beautiful without touching code." }},
+            { title: "Bubble", url: "https://bubble.io", cat: ["webdev"], pricing: "freemium", desc: { es: "Más complejo pero muy potente. Para apps serias sin saber programar.", en: "More complex but very powerful. For serious apps without knowing how to code." }},
+            { title: "v0", url: "https://v0.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "Mi favorito para crear aplicaciones mediante lenguaje natural.", en: "My favorite for creating applications using natural language." }},
+            { title: "Bolt", url: "https://bolt.new", cat: ["webdev"], pricing: "freemium", desc: { es: "Rápido para prototipos. Se queda corto en proyectos grandes pero para empezar va genial.", en: "Fast for prototypes. Falls short on big projects but great for starting out." }},
+            { title: "Replit", url: "https://replit.com", cat: ["webdev"], pricing: "freemium", desc: { es: "Una de las mejores herramientas para vibe coding cuando lo que buscas no es perfección técnica inmediata, sino fluidez, ritmo y ganas de crear.", en: "One of the best tools for vibe coding when what you seek is not immediate technical perfection, but flow, rhythm, and the desire to create." }},
+            { title: "Sora", url: "https://openai.com/sora", cat: ["image", "video"], pricing: "freemium", desc: { es: "El de OpenAI. Calidad brutal en imágenes y videos hiperrealistas. La calidad es increíble aunque el acceso es limitado.", en: "OpenAI's one. Brutal quality in realistic images and hyperrealistic videos. Quality is incredible although access is limited." }},
+            { title: "Suno", url: "https://suno.ai", cat: ["music"], pricing: "freemium", desc: { es: "Creas canciones completas con solo describirlas. Los resultados sorprenden bastante.", en: "Create complete songs just by describing them. The results are quite surprising." }},
+            { title: "Udio", url: "https://udio.com", cat: ["music"], pricing: "freemium", desc: { es: "Alternativa a Suno con mejor calidad de audio según algunos. Vale la pena probarlo.", en: "Alternative to Suno with better audio quality according to some. Worth trying." }},
+            { title: "Runway", url: "https://runwayml.com", cat: ["video"], pricing: "freemium", desc: { es: "El más conocido para video. Efectos visuales impresionantes y fácil de usar.", en: "The most well-known for video. Impressive visual effects and easy to use." }},
+            { title: "Pika", url: "https://pika.art", cat: ["video"], pricing: "freemium", desc: { es: "Videos cortos con estilo más artístico. Bueno para contenido creativo y diferente.", en: "Short videos with a more artistic style. Good for creative and different content." }},
+            { title: "Narakeet", url: "https://narakeet.com", cat: ["video", "voice"], pricing: "freemium", desc: { es: "Voces muy naturales en muchos idiomas. Lo uso para narrar videos sin grabar.", en: "Very natural voices in many languages. I use it to narrate videos without recording." }},
+            { title: "Tenorshare AI", url: "https://ai.tenorshare.com/products/ai-bypass", cat: ["humanizer"], pricing: "freemium", desc: { es: "Hace que textos de IA pasen desapercibidos. Útil si necesitas que suene más natural.", en: "Makes AI texts go unnoticed. Useful if you need it to sound more natural." }},
+            { title: "ChatHub", url: "https://app.chathub.gg/", cat: ["allinone"], pricing: "free", desc: { es: "Todos los modelos en un solo lugar. Perfecto para comparar respuestas lado a lado.", en: "All models in one place. Perfect for comparing responses side by side." }},
+            { title: "LMArena", url: "https://lmarena.ai", cat: ["allinone"], pricing: "free", desc: { es: "Pruebas a ciegas entre modelos. Interesante para ver cuál prefieres sin saber cuál es cuál.", en: "Blind tests between models. Interesting to see which one you prefer without knowing which is which." }},
+            { title: "Google AI Studio", url: "https://aistudio.google.com", cat: ["allinone"], pricing: "free", desc: { es: "Herramienta oficial de Google para usar sus modelos de IA como Gemini o Nano Banana.", en: "Google's official tool to use their AI models like Gemini or Nano Banana." }},
+            { title: "HuggingFace Spaces", url: "https://huggingface.co/spaces", cat: ["allinone"], pricing: "free", desc: { es: "Miles de modelos para probar gratis. El playground definitivo para explorar IA.", en: "Thousands of models to try for free. The ultimate playground for exploring AI." }},
+            { title: "Gamma", url: "https://gamma.app", cat: ["presentations"], pricing: "freemium", desc: { es: "Presentaciones en segundos. Le dices el tema y te genera algo presentable al instante.", en: "Presentations in seconds. You tell it the topic and it generates something presentable instantly." }},
+            { title: "Visme", url: "https://visme.co", cat: ["presentations"], pricing: "freemium", desc: { es: "Más control sobre el diseño que Gamma. Para cuando quieres algo más personalizado.", en: "More control over design than Gamma. For when you want something more customized." }},
+            { title: "Vacay Chatbot", url: "https://usevacay.com", cat: ["travel"], pricing: "free", desc: { es: "Te arma itinerarios completos en segundos. Sorprendentemente útil para planificar.", en: "Builds complete itineraries in seconds. Surprisingly useful for planning." }},
+            { title: "GuideGeek", url: "https://guidegeek.com", cat: ["travel"], pricing: "free", desc: { es: "Como tener un guía local que te responde cualquier duda sobre tu destino.", en: "Like having a local guide who answers any question about your destination." }},
+            { title: "Curiosio", url: "https://curiosio.com", cat: ["travel"], pricing: "free", desc: { es: "Especializado en road trips. Te sugiere rutas alternativas y lugares que no conocías.", en: "Specialized in road trips. Suggests alternative routes and places you didn't know." }}
         ];
 
-        let currentCategory = 'all';
-        let searchTerm = '';
+        let lang = 'es', category = 'all', search = '';
+        const $ = s => document.querySelector(s);
+        const $$ = s => document.querySelectorAll(s);
+        const t = () => i18n[lang];
 
-        function getDescription(bookmark) {
-            return descriptions[currentLang][bookmark.title] || bookmark.title;
-        }
+        function render() {
+            const filtered = bookmarks.filter(b =>
+                (category === 'all' || b.cat.includes(category)) &&
+                (b.title.toLowerCase().includes(search) || b.desc[lang].toLowerCase().includes(search))
+            );
 
-        function getCategoryDisplay(category) {
-            return translations[currentLang].categories[category] || category;
+            const grid = $('#bookmarksGrid');
+            const noRes = $('#noResults');
+
+            grid.style.display = filtered.length ? 'grid' : 'none';
+            noRes.style.display = filtered.length ? 'none' : 'block';
+
+            grid.innerHTML = filtered.map((b, i) => `
+                <div class="bookmark-card" style="animation-delay:${i * 0.1}s">
+                    <div class="bookmark-header">
+                        <div>
+                            <div class="bookmark-tags">
+                                ${b.cat.map(c => `<span class="bookmark-category" data-cat="${c}">${t().cat[c]}</span>`).join('')}
+                                <span class="bookmark-pricing ${b.pricing}">${t().pricing[b.pricing]}</span>
+                            </div>
+                            <h3 class="bookmark-title">${b.title}</h3>
+                        </div>
+                        <img class="bookmark-logo" src="https://www.google.com/s2/favicons?domain=${new URL(b.url).hostname}&sz=64" alt="${b.title}">
+                    </div>
+                    <p class="bookmark-description">${b.desc[lang]}</p>
+                    <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">${t().visit}</a>
+                </div>
+            `).join('');
+
+            $$('.bookmark-category').forEach(el => el.addEventListener('click', () => filterByCategory(el.dataset.cat)));
         }
 
         function updateUI() {
-            const t = translations[currentLang];
-
-            document.querySelector('h1').textContent = t.title;
-            document.querySelector('.subtitle').textContent = t.subtitle;
-            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-            document.getElementById('noResults').textContent = t.noResults;
-            document.querySelector('.add-bookmark-btn').title = t.addBookmark;
-            document.querySelector('footer p').textContent = t.footer;
-            document.documentElement.lang = currentLang;
-
-            // Actualizar botones de categoría
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                const cat = btn.dataset.category;
-                btn.textContent = t.categories[cat] || cat;
-            });
-
-            renderBookmarks();
+            $('h1').textContent = t().title;
+            $('.subtitle').textContent = t().subtitle;
+            $('#searchInput').placeholder = t().search;
+            $('#noResults').textContent = t().noResults;
+            $('footer p').textContent = t().footer;
+            document.documentElement.lang = lang;
+            $$('.category-btn').forEach(btn => btn.textContent = t().cat[btn.dataset.category]);
+            render();
         }
 
-        function renderBookmarks() {
-            const grid = document.getElementById('bookmarksGrid');
-            const noResults = document.getElementById('noResults');
-            const t = translations[currentLang];
-
-            const filtered = bookmarks.filter(bookmark => {
-                const matchesCategory = currentCategory === 'all' || bookmark.category === currentCategory;
-                const description = getDescription(bookmark);
-                const matchesSearch = bookmark.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    description.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchesCategory && matchesSearch;
-            });
-
-            if (filtered.length === 0) {
-                grid.style.display = 'none';
-                noResults.style.display = 'block';
-                return;
-            }
-
-            grid.style.display = 'grid';
-            noResults.style.display = 'none';
-
-            grid.innerHTML = filtered.map((bookmark, index) => `
-                <div class="bookmark-card" style="animation-delay: ${index * 0.1}s">
-                    <span class="bookmark-category">${getCategoryDisplay(bookmark.category)}</span>
-                    <h3 class="bookmark-title">${bookmark.title}</h3>
-                    <p class="bookmark-description">${getDescription(bookmark)}</p>
-                    <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">
-                        ${t.visitSite}
-                    </a>
-                </div>
-            `).join('');
+        function filterByCategory(cat) {
+            category = cat;
+            $$('.category-btn').forEach(b => b.classList.toggle('active', b.dataset.category === cat));
+            render();
         }
 
-        // Event listeners
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentCategory = btn.dataset.category;
-                renderBookmarks();
-            });
-        });
+        function initCategories() {
+            const cats = ['all', ...CATEGORIES];
+            $('#categories').innerHTML = cats.map(c =>
+                `<button class="category-btn${c === 'all' ? ' active' : ''}" data-category="${c}">${t().cat[c]}</button>`
+            ).join('');
+            $$('.category-btn').forEach(btn => btn.addEventListener('click', () => filterByCategory(btn.dataset.category)));
+        }
 
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            searchTerm = e.target.value;
-            renderBookmarks();
-        });
+        $('#searchInput').addEventListener('input', e => { search = e.target.value.toLowerCase(); render(); });
 
-        document.querySelector('.add-bookmark-btn').addEventListener('click', () => {
-            alert(translations[currentLang].addBookmarkAlert);
-        });
+        $$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
+            $$('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            lang = btn.dataset.lang;
+            initCategories();
+            updateUI();
+        }));
 
-        // Event listener para idioma
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentLang = btn.dataset.lang;
-                updateUI();
-            });
-        });
-
-        // Render inicial
-        renderBookmarks();
+        initCategories();
+        render();
     </script>
 </body>
 </html>
