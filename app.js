@@ -11,7 +11,8 @@ const i18n = {
         suggest: "Sugerir herramienta",
         resultsCounter: "Mostrando {filtered} de {total} herramientas",
         cat: { all: "Todos", general: "General", code: "Código", webdev: "Desarrollo Web", image: "Imagen", music: "Música", video: "Video", voice: "Voz", humanizer: "Humanizador", allinone: "Muchos en uno", presentations: "Presentaciones", travel: "Viajes", automation: "Automatizaciones" },
-        pricing: { free: "Gratis", freemium: "Limitado" }
+        pricing: { free: "Gratis", freemium: "Limitado" },
+        recommended: "Recomendado"
     },
     en: {
         title: "AI Bookmarks",
@@ -23,7 +24,8 @@ const i18n = {
         suggest: "Suggest tool",
         resultsCounter: "Showing {filtered} of {total} tools",
         cat: { all: "All", general: "General", code: "Code", webdev: "Web Development", image: "Image", music: "Music", video: "Video", voice: "Voice", humanizer: "Humanizer", allinone: "Many in one", presentations: "Presentations", travel: "Travel", automation: "Automation" },
-        pricing: { free: "Free", freemium: "Limited" }
+        pricing: { free: "Free", freemium: "Limited" },
+        recommended: "Recommended"
     }
 };
 
@@ -31,7 +33,8 @@ const bookmarks = [
     { title: "ChatGPT", url: "https://chat.openai.com", cat: ["general"], pricing: "freemium", desc: { es: "El clásico. Perfecto para cualquier cosa: escribir, investigar, resolver dudas. El más versátil.", en: "The classic. Perfect for anything: writing, research, solving questions. The most versatile." }},
     { title: "Perplexity", url: "https://perplexity.ai", cat: ["general"], pricing: "freemium", desc: { es: "Como Google pero te da la respuesta directa con fuentes. Ideal para investigar rápido.", en: "Like Google but gives you the direct answer with sources. Ideal for quick research." }},
     { title: "NotebookLM", url: "https://notebooklm.google/", cat: ["general"], pricing: "free", desc: { es: "El asistente de Google para investigar. Sube PDFs, webs o textos y te genera resúmenes, respuestas y hasta podcasts.", en: "Google's research assistant. Upload PDFs, websites or texts and it generates summaries, answers and even podcasts." }},
-    { title: "Claude", url: "https://claude.ai", cat: ["code"], pricing: "freemium", desc: { es: "Mi favorito para programar. Entiende el contexto mejor que nadie y no se pierde en proyectos grandes.", en: "My favorite for coding. Understands context better than anyone and doesn't get lost in big projects." }},
+    { title: "Claude", url: "https://claude.ai", cat: ["code"], pricing: "freemium", recommended: true, desc: { es: "Mi favorito para programar. Entiende el contexto mejor que nadie y no se pierde en proyectos grandes.", en: "My favorite for coding. Understands context better than anyone and doesn't get lost in big projects." }},
+    { title: "Opencode", url: "https://opencode.ai", cat: ["code"], pricing: "free", recommended: true, desc: { es: "Agente de código en terminal. Open source y con soporte para múltiples modelos de IA.", en: "Terminal-based coding agent. Open source with support for multiple AI models." }},
     { title: "Lovable", url: "https://lovable.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "El más fácil para empezar. En minutos tienes algo funcional y bonito sin tocar código.", en: "In minutes you have something functional and beautiful without touching code." }},
     { title: "Bubble", url: "https://bubble.io", cat: ["webdev"], pricing: "freemium", desc: { es: "Más complejo pero muy potente. Para apps serias sin saber programar.", en: "More complex but very powerful. For serious apps without knowing how to code." }},
     { title: "v0", url: "https://v0.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "Mi favorito para crear aplicaciones mediante lenguaje natural.", en: "My favorite for creating applications using natural language." }},
@@ -45,9 +48,10 @@ const bookmarks = [
     { title: "Udio", url: "https://udio.com", cat: ["music"], pricing: "freemium", desc: { es: "Alternativa a Suno con mejor calidad de audio según algunos. Vale la pena probarlo.", en: "Alternative to Suno with better audio quality according to some. Worth trying." }},
     { title: "Runway", url: "https://runwayml.com", cat: ["video"], pricing: "freemium", desc: { es: "El más conocido para video. Efectos visuales impresionantes y fácil de usar.", en: "The most well-known for video. Impressive visual effects and easy to use." }},
     { title: "Pika", url: "https://pika.art", cat: ["video"], pricing: "freemium", desc: { es: "Videos cortos con estilo más artístico. Bueno para contenido creativo y diferente.", en: "Short videos with a more artistic style. Good for creative and different content." }},
-    { title: "Narakeet", url: "https://narakeet.com", cat: ["video", "voice"], pricing: "freemium", desc: { es: "Voces muy naturales en muchos idiomas. Lo uso para narrar videos sin grabar.", en: "Very natural voices in many languages. I use it to narrate videos without recording." }},
+    { title: "Narakeet", url: "https://narakeet.com", cat: ["video", "voice"], pricing: "freemium", recommended: true, desc: { es: "Voces muy naturales en muchos idiomas. Lo uso para narrar videos sin grabar.", en: "Very natural voices in many languages. I use it to narrate videos without recording." }},
     { title: "ElevenLabs", url: "https://elevenlabs.io", cat: ["voice", "music"], pricing: "freemium", desc: { es: "La mejor calidad de voz sintética. Clona voces, genera audio hiperrealista, crea canciones y efectos de sonido.", en: "The best synthetic voice quality. Clone voices, generate hyperrealistic audio, create songs and sound effects." }},
     { title: "Tenorshare AI", url: "https://ai.tenorshare.com/products/ai-bypass", cat: ["humanizer"], pricing: "freemium", desc: { es: "Hace que textos de IA pasen desapercibidos. Útil si necesitas que suene más natural.", en: "Makes AI texts go unnoticed. Useful if you need it to sound more natural." }},
+    { title: "Genspark", url: "https://www.genspark.ai/", cat: ["allinone"], pricing: "freemium", desc: { es: "Motor de búsqueda con IA que combina múltiples LLMs. Su Super Agent automatiza tareas complejas: crea slides, documentos, e incluso hace llamadas por ti.", en: "AI search engine combining multiple LLMs. Its Super Agent automates complex tasks: creates slides, documents, and even makes phone calls for you." }},
     { title: "ChatHub", url: "https://app.chathub.gg/", cat: ["allinone"], pricing: "free", desc: { es: "Todos los modelos en un solo lugar. Perfecto para comparar respuestas lado a lado.", en: "All models in one place. Perfect for comparing responses side by side." }},
     { title: "LMArena", url: "https://lmarena.ai", cat: ["allinone"], pricing: "free", desc: { es: "Pruebas a ciegas entre modelos. Interesante para ver cuál prefieres sin saber cuál es cuál.", en: "Blind tests between models. Interesting to see which one you prefer without knowing which is which." }},
     { title: "Google AI Studio", url: "https://aistudio.google.com", cat: ["allinone"], pricing: "free", desc: { es: "Herramienta oficial de Google para usar sus modelos de IA como Gemini o Nano Banana.", en: "Google's official tool to use their AI models like Gemini or Nano Banana." }},
@@ -98,6 +102,7 @@ function render() {
             </div>
             <p class="bookmark-description">${b.desc[lang]}</p>
             <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">${t().visit}</a>
+            ${b.recommended ? `<span class="bookmark-recommended">⭐ ${t().recommended}</span>` : ''}
         </div>
     `).join('');
 

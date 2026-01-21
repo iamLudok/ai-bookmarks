@@ -287,6 +287,21 @@ h1 {
     color: var(--color-freemium);
 }
 
+.bookmark-recommended {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 4px 10px;
+    background: rgba(255, 107, 107, 0.15);
+    border: 1px solid #ff6b6b;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ff6b6b;
+}
+
 .bookmark-title {
     font-size: 1.2rem;
     font-weight: 600;
