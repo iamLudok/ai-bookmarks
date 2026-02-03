@@ -11,9 +11,13 @@
 <body>
     <div class="background-effect"></div>
 
-    <div class="language-selector">
-        <button class="lang-btn active" data-lang="es">ES</button>
-        <button class="lang-btn" data-lang="en">EN</button>
+    <div class="top-right-controls">
+        <button id="dictionaryBtn" class="dictionary-btn">📖 <span data-i18n="dictionary">Diccionario IA</span></button>
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="es">ES</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="eu">EU</button>
+        </div>
     </div>
 
     <div class="container">
@@ -21,6 +25,16 @@
             <h1>Marcadores de IA</h1>
             <p class="subtitle">Mi selección de herramientas de IA gratuitas o freemium. Probadas y recomendadas.</p>
         </header>
+
+        <div id="dictionaryModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Diccionario de IA</h2>
+                    <button class="modal-close" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body" id="dictionaryContent"></div>
+            </div>
+        </div>
 
         <div class="search-container">
             <div class="search-box">
