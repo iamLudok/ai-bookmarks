@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcadores de IA</title>
     <link rel="icon" type="image/png" href="ai-bookmarks-logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="background-effect"></div>
-
     <div class="top-right-controls">
         <div class="language-selector">
             <button class="lang-btn active" data-lang="es">ES</button>
@@ -23,6 +21,10 @@
         <header>
             <h1>Marcadores de IA</h1>
             <p class="subtitle">Mi selección de herramientas de IA gratuitas o freemium. Probadas y recomendadas.</p>
+            <div class="header-actions">
+                <button id="stackBtn" class="ctrl-btn"><span data-i18n="buildStack">arma tu stack</span></button>
+                <button id="suggestBtn" class="ctrl-btn"><span data-i18n="suggest">Sugerir herramienta</span></button>
+            </div>
         </header>
 
         <div class="search-container">
@@ -44,9 +46,26 @@
     </div>
 
     <footer>
+        <span class="footer-prompt">$</span>
         <p>Marcadores de IA - 2026 | made by iamLudok</p>
-        <button id="suggestBtn" class="suggest-btn">💡 <span data-i18n="suggest">Sugerir herramienta</span></button>
     </footer>
+
+    <!-- Stack Builder Modal -->
+    <div id="stackModal" class="stack-overlay" aria-hidden="true">
+        <div class="stack-terminal">
+            <div class="stack-bar">
+                <span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span>
+                <span class="stack-bar-title">~/tools/build-stack.sh</span>
+                <button class="stack-close" id="stackClose">×</button>
+            </div>
+            <div class="stack-body" id="stackBody"></div>
+        </div>
+    </div>
+
+    <!-- Screensaver -->
+    <div id="screensaver" class="screensaver" aria-hidden="true">
+        <span class="screensaver-hint">// press any key</span>
+    </div>
 
     <script src="app.js"></script>
 </body>

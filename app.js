@@ -8,11 +8,12 @@ const i18n = {
         noResults: "No se encontraron marcadores que coincidan con tu búsqueda.",
         visit: "Visitar sitio",
         footer: "Marcadores de IA - 2026 | made by iamLudok",
-        suggest: "Sugerir herramienta",
+        suggest: "sugerir herramienta",
         resultsCounter: "Mostrando {filtered} de {total} herramientas",
         cat: { all: "Todos", general: "General", code: "Código", webdev: "Desarrollo Web", image: "Imagen", music: "Música", video: "Video", voice: "Voz", humanizer: "Humanizador", allinone: "Muchos en uno", presentations: "Presentaciones", travel: "Viajes", automation: "Automatizaciones", ragstack: "RAG Stack" },
         pricing: { free: "Gratis", freemium: "Limitado" },
-        recommended: "Recomendado"
+        recommended: "Recomendado",
+        buildStack: "arma tu stack"
     },
     en: {
         title: "AI Bookmarks",
@@ -21,11 +22,12 @@ const i18n = {
         noResults: "No bookmarks found matching your search.",
         visit: "Visit site",
         footer: "AI Bookmarks - 2026 | made by iamLudok",
-        suggest: "Suggest tool",
+        suggest: "suggest tool",
         resultsCounter: "Showing {filtered} of {total} tools",
         cat: { all: "All", general: "General", code: "Code", webdev: "Web Development", image: "Image", music: "Music", video: "Video", voice: "Voice", humanizer: "Humanizer", allinone: "Many in one", presentations: "Presentations", travel: "Travel", automation: "Automation", ragstack: "RAG Stack" },
         pricing: { free: "Free", freemium: "Limited" },
-        recommended: "Recommended"
+        recommended: "Recommended",
+        buildStack: "build your stack"
     },
     eu: {
         title: "AA Laster-markak",
@@ -34,11 +36,12 @@ const i18n = {
         noResults: "Ez da zure bilaketarekin bat datorren laster-markarik aurkitu.",
         visit: "Gunea bisitatu",
         footer: "AA Laster-markak - 2026 | made by iamLudok",
-        suggest: "Tresna iradoki",
+        suggest: "tresna iradoki",
         resultsCounter: "{filtered} erakusten {total}-(e)tik",
         cat: { all: "Denak", general: "Orokorra", code: "Kodea", webdev: "Web Garapena", image: "Irudia", music: "Musika", video: "Bideoa", voice: "Ahotsa", humanizer: "Humanizatzailea", allinone: "Asko batean", presentations: "Aurkezpenak", travel: "Bidaiak", automation: "Automatizazioak", ragstack: "RAG Stack" },
         pricing: { free: "Doakoa", freemium: "Mugatua" },
-        recommended: "Gomendatua"
+        recommended: "Gomendatua",
+        buildStack: "zure stack-a eraiki"
     }
 };
 
@@ -84,10 +87,16 @@ const bookmarks = [
     { title: "HeyGen", url: "https://app.heygen.com/", cat: ["video"], pricing: "freemium", desc: { es: "Crea videos con avatares realistas que hablan por ti. Ideal para presentaciones, formación y contenido sin ponerte delante de la cámara.", en: "Create videos with realistic avatars that speak for you. Ideal for presentations, training and content without being on camera.", eu: "Zuretzat hitz egiten duten avatar errealistekin bideoak sortzen ditu. Aurkezpenetarako, prestakuntzarako eta kameraren aurrean jarri gabe edukia sortzeko aproposa." }}
 ];
 
-let lang = 'es', category = 'all', search = '';
+let lang = localStorage.getItem('lang') || 'es', category = 'all', search = '';
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 const t = () => i18n[lang];
+
+function highlight(text, term) {
+    if (!term) return text;
+    const escaped = term.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+    return text.replaceAll(new RegExp(escaped, 'gi'), m => `<mark class="search-hl">${m}</mark>`);
+}
 
 function render() {
     const filtered = bookmarks.filter(b =>
@@ -120,7 +129,7 @@ function render() {
                 </div>
                 <img class="bookmark-logo" src="https://www.google.com/s2/favicons?domain=${new URL(b.url).hostname}&sz=64" alt="${b.title}">
             </div>
-            <p class="bookmark-description">${b.desc[lang]}</p>
+            <p class="bookmark-description">${highlight(b.desc[lang], search)}</p>
             <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">${t().visit}</a>
             ${b.recommended ? `<span class="bookmark-recommended">⭐ ${t().recommended}</span>` : ''}
         </div>
@@ -136,8 +145,12 @@ function updateUI() {
     $('#noResults').textContent = t().noResults;
     $('footer p').textContent = t().footer;
     $('[data-i18n="suggest"]').textContent = t().suggest;
+    $('[data-i18n="buildStack"]').textContent = t().buildStack;
     document.documentElement.lang = lang;
-    $$('.category-btn').forEach(btn => btn.textContent = t().cat[btn.dataset.category]);
+    $$('.category-btn').forEach(btn => {
+        const c = btn.dataset.category;
+        btn.innerHTML = `${t().cat[c]}<span class="cat-count">${catCount(c)}</span>`;
+    });
     render();
 }
 
@@ -147,10 +160,14 @@ function filterByCategory(cat) {
     render();
 }
 
+function catCount(c) {
+    return c === 'all' ? bookmarks.length : bookmarks.filter(b => b.cat.includes(c)).length;
+}
+
 function initCategories() {
     const cats = ['all', ...CATEGORIES];
     $('#categories').innerHTML = cats.map(c =>
-        `<button class="category-btn${c === 'all' ? ' active' : ''}" data-category="${c}">${t().cat[c]}</button>`
+        `<button class="category-btn${c === 'all' ? ' active' : ''}" data-category="${c}">${t().cat[c]}<span class="cat-count">${catCount(c)}</span></button>`
     ).join('');
     $$('.category-btn').forEach(btn => btn.addEventListener('click', () => filterByCategory(btn.dataset.category)));
 }
@@ -161,6 +178,7 @@ $$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
     $$('.lang-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     lang = btn.dataset.lang;
+    localStorage.setItem('lang', lang);
     initCategories();
     updateUI();
 }));
@@ -221,5 +239,239 @@ Eskerrik asko zure iradokizunagatik! 🙌`
     window.open(`https://github.com/iamLudok/ai-bookmarks/issues/new?title=${title}&body=${body}&labels=suggestion`, '_blank');
 });
 
+// =============================================
+// SCREENSAVER
+// =============================================
+let inactivityTimer = null;
+let screensaverActive = false;
+let screensaverRAF = null;
+
+function startScreensaver() {
+    screensaverActive = true;
+    const el = $('#screensaver');
+    el.style.display = 'block';
+
+    const logos = bookmarks.map(b => {
+        const img = document.createElement('img');
+        img.src = `https://www.google.com/s2/favicons?domain=${new URL(b.url).hostname}&sz=64`;
+        img.className = 'screensaver-logo';
+        img.alt = b.title;
+        const size = 40;
+        const x = Math.random() * (window.innerWidth - size);
+        const y = Math.random() * (window.innerHeight - size);
+        const speed = 1.2 + Math.random() * 1.2;
+        const angle = Math.random() * 2 * Math.PI;
+        img._x = x; img._y = y;
+        img._vx = Math.cos(angle) * speed;
+        img._vy = Math.sin(angle) * speed;
+        img._size = size;
+        img.style.cssText = `left:${x}px;top:${y}px;`;
+        el.appendChild(img);
+        return img;
+    });
+
+    function animate() {
+        if (!screensaverActive) return;
+        const W = window.innerWidth, H = window.innerHeight;
+        logos.forEach(img => {
+            img._x += img._vx;
+            img._y += img._vy;
+            if (img._x <= 0 || img._x + img._size >= W) { img._vx *= -1; img._x = Math.max(0, Math.min(W - img._size, img._x)); }
+            if (img._y <= 0 || img._y + img._size >= H) { img._vy *= -1; img._y = Math.max(0, Math.min(H - img._size, img._y)); }
+            img.style.left = img._x + 'px';
+            img.style.top  = img._y + 'px';
+        });
+        screensaverRAF = requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+function stopScreensaver() {
+    if (!screensaverActive) return;
+    screensaverActive = false;
+    cancelAnimationFrame(screensaverRAF);
+    const el = $('#screensaver');
+    el.style.display = 'none';
+    el.querySelectorAll('img').forEach(img => img.remove());
+}
+
+function resetInactivity() {
+    if (screensaverActive) { stopScreensaver(); return; }
+    clearTimeout(inactivityTimer);
+    if (!$('#stackModal').classList.contains('show')) {
+        inactivityTimer = setTimeout(startScreensaver, 30000);
+    }
+}
+
+['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt =>
+    document.addEventListener(evt, resetInactivity, { passive: true })
+);
+resetInactivity();
+
+// =============================================
+// STACK BUILDER
+// =============================================
+const STACK_Q = {
+    es: {
+        steps: [
+            { key: 'usecase', label: '¿Qué quieres hacer?', opts: [
+                { val: 'content',  label: 'Crear contenido (video, imagen, música)' },
+                { val: 'code',     label: 'Programar o hacer webs' },
+                { val: 'automate', label: 'Automatizar tareas' },
+                { val: 'research', label: 'Investigar o aprender' },
+                { val: 'present',  label: 'Crear presentaciones' },
+                { val: 'travel',   label: 'Planificar viajes' },
+            ]},
+            { key: 'pricing', label: '¿Qué precio te va?', opts: [
+                { val: 'free', label: 'Solo herramientas gratuitas' },
+                { val: 'any',  label: 'Freemium también me vale' },
+            ]},
+            { key: 'level', label: '¿Cuánto sabes de tecnología?', opts: [
+                { val: 'basic',    label: 'Lo básico' },
+                { val: 'advanced', label: 'Me manejo bien' },
+            ]},
+        ],
+        result: 'tu stack:',
+        reset: 'empezar de nuevo', notools: 'Ninguna herramienta coincide con los filtros.',
+    },
+    en: {
+        steps: [
+            { key: 'usecase', label: 'What do you want to do?', opts: [
+                { val: 'content',  label: 'Create content (video, image, music)' },
+                { val: 'code',     label: 'Code or build websites' },
+                { val: 'automate', label: 'Automate tasks' },
+                { val: 'research', label: 'Research or learn' },
+                { val: 'present',  label: 'Create presentations' },
+                { val: 'travel',   label: 'Plan trips' },
+            ]},
+            { key: 'pricing', label: 'What pricing works for you?', opts: [
+                { val: 'free', label: 'Free tools only' },
+                { val: 'any',  label: 'Freemium is fine too' },
+            ]},
+            { key: 'level', label: 'How tech-savvy are you?', opts: [
+                { val: 'basic',    label: 'Basic level' },
+                { val: 'advanced', label: 'Pretty comfortable' },
+            ]},
+        ],
+        result: 'your stack:',
+        reset: 'start over', notools: 'No tools match your filters.',
+    },
+    eu: {
+        steps: [
+            { key: 'usecase', label: 'Zer egin nahi duzu?', opts: [
+                { val: 'content',  label: 'Edukia sortu (bideoa, irudia, musika)' },
+                { val: 'code',     label: 'Programatu edo webak eraiki' },
+                { val: 'automate', label: 'Atazak automatizatu' },
+                { val: 'research', label: 'Ikertu edo ikasi' },
+                { val: 'present',  label: 'Aurkezpenak sortu' },
+                { val: 'travel',   label: 'Bidaiak planifikatu' },
+            ]},
+            { key: 'pricing', label: 'Zer prezio nahiago duzu?', opts: [
+                { val: 'free', label: 'Tresna doakoak soilik' },
+                { val: 'any',  label: 'Freemium ere ondo' },
+            ]},
+            { key: 'level', label: 'Zenbat dakizu teknologiaz?', opts: [
+                { val: 'basic',    label: 'Oinarrizko maila' },
+                { val: 'advanced', label: 'Ondo moldatzen naiz' },
+            ]},
+        ],
+        result: 'zure stack-a:',
+        reset: 'berriro hasi', notools: 'Ez dago filtro guztiak betetzen dituen tresnarik.',
+    },
+};
+
+const USE_CASE_CATS = {
+    content:  ['image', 'video', 'music', 'voice'],
+    code:     ['code', 'webdev'],
+    automate: ['automation', 'ragstack'],
+    research: ['general', 'allinone'],
+    present:  ['presentations'],
+    travel:   ['travel'],
+};
+
+let stackAnswers = {};
+
+function getStackRecommendations() {
+    const cats = USE_CASE_CATS[stackAnswers.usecase] || [];
+    return bookmarks.filter(b => {
+        const catMatch  = b.cat.some(c => cats.includes(c));
+        const priceMatch = stackAnswers.pricing === 'any' || b.pricing === 'free';
+        const levelMatch = stackAnswers.level === 'advanced' || !b.cat.includes('ragstack');
+        return catMatch && priceMatch && levelMatch;
+    }).slice(0, 4);
+}
+
+function renderStack() {
+    const body  = $('#stackBody');
+    const q     = STACK_Q[lang];
+    let html    = '';
+
+    for (const step of q.steps) {
+        html += `<p class="stack-prompt">&gt; ${step.label}</p>`;
+        if (stackAnswers[step.key]) {
+            const chosen = step.opts.find(o => o.val === stackAnswers[step.key]);
+            html += `<p class="stack-answer">${chosen.label}</p>`;
+        } else {
+            html += `<div class="stack-options">`;
+            step.opts.forEach(o => {
+                html += `<button class="stack-option" data-key="${step.key}" data-val="${o.val}">${o.label}</button>`;
+            });
+            html += `</div>`;
+            body.innerHTML = html;
+            $$('.stack-option').forEach(btn => btn.addEventListener('click', () => {
+                stackAnswers[btn.dataset.key] = btn.dataset.val;
+                renderStack();
+                body.scrollTop = body.scrollHeight;
+            }));
+            return;
+        }
+    }
+
+    // All answered → show results
+    const tools = getStackRecommendations();
+    html += `<p class="stack-prompt">&gt; ${q.result}</p>`;
+    if (tools.length) {
+        tools.forEach(tb => {
+            html += `
+            <div class="stack-tool">
+                <img src="https://www.google.com/s2/favicons?domain=${new URL(tb.url).hostname}&sz=32" class="stack-tool-logo" alt="${tb.title}">
+                <div class="stack-tool-info">
+                    <span class="stack-tool-name">${tb.title}</span>
+                    <span class="stack-tool-desc">${tb.desc[lang]}</span>
+                </div>
+            </div>`;
+        });
+    } else {
+        html += `<p class="stack-no-tools">${q.notools}</p>`;
+    }
+    html += `<button class="stack-reset-btn" id="stackResetBtn">&gt; ${q.reset}</button>`;
+    body.innerHTML = html;
+    body.scrollTop = body.scrollHeight;
+
+    $('#stackResetBtn').addEventListener('click', () => { stackAnswers = {}; renderStack(); });
+}
+
+$('#stackBtn').addEventListener('click', () => {
+    stackAnswers = {};
+    renderStack();
+    $('#stackModal').classList.add('show');
+    resetInactivity();
+});
+$('#stackClose').addEventListener('click', () => $('#stackModal').classList.remove('show'));
+$('#stackModal').addEventListener('click', e => { if (e.target === $('#stackModal')) $('#stackModal').classList.remove('show'); });
+
+document.addEventListener('keydown', e => {
+    const input = $('#searchInput');
+    if (e.key === 'Escape') {
+        if ($('#stackModal').classList.contains('show')) { $('#stackModal').classList.remove('show'); return; }
+        if (document.activeElement === input) { input.value = ''; search = ''; input.blur(); render(); }
+    }
+    if (e.key === '/' && document.activeElement !== input && !$('#stackModal').classList.contains('show')) {
+        e.preventDefault();
+        input.focus();
+    }
+});
+
+$$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
 initCategories();
-render();
+updateUI();
