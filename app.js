@@ -112,6 +112,10 @@ const bookmarks = [
 let lang = localStorage.getItem('lang') || 'es', category = 'all', search = '', pricingFilter = 'all', showFavorites = false, sortOrder = 'default';
 let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const t = () => i18n[lang];
+
 function toggleFavorite(url) {
     if (favorites.has(url)) favorites.delete(url);
     else favorites.add(url);
@@ -132,9 +136,6 @@ function sortBookmarks(arr) {
     if (sortOrder === 'recommended') return copy.sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0));
     return arr;
 }
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-const t = () => i18n[lang];
 
 function isNew(addedAt) {
     if (!addedAt) return false;
@@ -191,17 +192,6 @@ function render() {
         </div>
     `).join('');
 
-    $$('.bookmark-category').forEach(el => el.addEventListener('click', () => filterByCategory(el.dataset.cat)));
-    $$('.bookmark-pricing').forEach(el => el.addEventListener('click', () => {
-        pricingFilter = el.dataset.pricing;
-        $$('.pricing-btn').forEach(b => b.classList.toggle('active', b.dataset.pricing === pricingFilter));
-        render();
-    }));
-    $$('.bookmark-fav').forEach(btn => btn.addEventListener('click', e => {
-        e.preventDefault();
-        toggleFavorite(btn.dataset.url);
-    }));
-
     updateCatCounts();
 
     const favBtn = $('#favToggleBtn');
@@ -220,10 +210,7 @@ function updateUI() {
     $('[data-i18n="suggest"]').textContent = t().suggest;
     $('[data-i18n="buildStack"]').textContent = t().buildStack;
     document.documentElement.lang = lang;
-    $$('.category-btn').forEach(btn => {
-        const c = btn.dataset.category;
-        btn.innerHTML = `${t().cat[c]}<span class="cat-count">${catCount(c)}</span>`;
-    });
+    updateCatCounts();
     initPricingFilter();
     initSortBar();
     render();
@@ -316,7 +303,7 @@ $('#suggestBtn').addEventListener('click', () => {
 
 **URL:**
 
-**Categoría:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack)
+**Categoría:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
 
 **Precio:** (free / freemium)
 
@@ -330,7 +317,7 @@ Gracias por tu sugerencia! 🙌`,
 
 **URL:**
 
-**Category:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack)
+**Category:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
 
 **Pricing:** (free / freemium)
 
@@ -344,7 +331,7 @@ Thanks for your suggestion! 🙌`,
 
 **URL:**
 
-**Kategoria:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack)
+**Kategoria:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
 
 **Prezioa:** (free / freemium)
 
@@ -596,8 +583,23 @@ document.addEventListener('keydown', e => {
     }
 });
 
+$('#bookmarksGrid').addEventListener('click', e => {
+    const cat     = e.target.closest('.bookmark-category');
+    const pricing = e.target.closest('.bookmark-pricing');
+    const fav     = e.target.closest('.bookmark-fav');
+    if (cat) { filterByCategory(cat.dataset.cat); return; }
+    if (pricing) {
+        pricingFilter = pricing.dataset.pricing;
+        $$('.pricing-btn').forEach(b => b.classList.toggle('active', b.dataset.pricing === pricingFilter));
+        render();
+        return;
+    }
+    if (fav) {
+        e.preventDefault();
+        toggleFavorite(fav.dataset.url);
+    }
+});
+
 $$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
 initCategories();
-initPricingFilter();
-initSortBar();
 updateUI();

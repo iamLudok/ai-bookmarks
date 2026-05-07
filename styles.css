@@ -15,8 +15,10 @@
   --text-muted:    #555555;
   --border:        #222222;
   --border-accent: rgba(0, 255, 136, 0.25);
-  --color-free:    #2ecc71;
-  --color-freemium:#f1c40f;
+  --color-free:        #60a5fa;
+  --color-free-border: rgba(96, 165, 250, 0.3);
+  --color-free-bg:     rgba(96, 165, 250, 0.08);
+  --color-freemium:    #f1c40f;
   --font-mono:     'JetBrains Mono', 'Courier New', monospace;
   --font-body:     'Inter', system-ui, sans-serif;
   --radius:        8px;
@@ -212,9 +214,9 @@ h1::before {
   background: var(--bg-2);
 }
 .pricing-btn.active[data-pricing="free"] {
-  color: #60a5fa;
-  border-color: rgba(96, 165, 250, 0.3);
-  background: rgba(96, 165, 250, 0.08);
+  color: var(--color-free);
+  border-color: var(--color-free-border);
+  background: var(--color-free-bg);
 }
 .pricing-btn.active[data-pricing="freemium"] {
   color: var(--color-freemium);
@@ -388,9 +390,9 @@ h1::before {
 }
 .bookmark-pricing[data-tooltip]:hover::after { opacity: 1; }
 .bookmark-pricing.free {
-  background: rgba(96, 165, 250, 0.08);
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  color: #60a5fa;
+  background: var(--color-free-bg);
+  border: 1px solid var(--color-free-border);
+  color: var(--color-free);
 }
 .bookmark-pricing.freemium {
   background: rgba(241, 196, 15, 0.08);
@@ -509,10 +511,6 @@ footer p { color: var(--text-muted); }
 .footer-prompt {
   color: var(--accent);
   font-family: var(--font-mono);
-}
-
-.footer-sep {
-  color: var(--text-muted);
 }
 
 
@@ -748,5 +746,22 @@ footer p { color: var(--text-muted); }
   footer {
     flex-direction: column;
     gap: 10px;
+  }
+  .pricing-filter {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .fav-toggle-btn {
+    margin-left: 0;
+  }
+  .sort-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sort-label {
+    width: 100%;
+    text-align: center;
+    margin-right: 0;
+    margin-bottom: 4px;
   }
 }
