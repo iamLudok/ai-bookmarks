@@ -1,84 +1,127 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bookmarks | iamLudok</title>
-    <meta name="description" content="Free and freemium AI tools, tested and recommended by iamLudok.">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="AI Bookmarks | iamLudok">
-    <meta property="og:description" content="Free and freemium AI tools, tested and recommended.">
-    <meta property="og:image" content="ai-bookmarks-logo.png">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="AI Bookmarks | iamLudok">
-    <meta name="twitter:description" content="Free and freemium AI tools, tested and recommended.">
-    <link rel="icon" type="image/png" href="ai-bookmarks-logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Bookmarks | iamLudok</title>
+  <meta name="description" content="Free and freemium AI tools, tested and recommended by iamLudok.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI Bookmarks | iamLudok">
+  <meta property="og:description" content="Free and freemium AI tools, tested and recommended.">
+  <meta property="og:image" content="ai-bookmarks-logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AI Bookmarks | iamLudok">
+  <meta name="twitter:description" content="Free and freemium AI tools, tested and recommended.">
+  <link rel="icon" type="image/png" href="ai-bookmarks-logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="top-right-controls">
-        <div class="language-selector">
-            <button class="lang-btn active" data-lang="es">ES</button>
-            <button class="lang-btn" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="eu">EU</button>
-        </div>
+
+<!-- Language selector (fixed top-right) -->
+<div class="top-right-controls">
+  <button class="lang-btn active" data-lang="es">ES</button>
+  <button class="lang-btn" data-lang="en">EN</button>
+  <button class="lang-btn" data-lang="eu">EU</button>
+</div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" aria-label="Navegación principal">
+    <div class="brand">
+      <img src="ai-bookmarks-logo.png" alt="logo" class="brand-logo">
     </div>
 
-    <div class="container">
-        <header>
-            <h1>Marcadores de IA</h1>
-            <p class="subtitle">Mi selección de herramientas de IA gratuitas o freemium. Probadas y recomendadas.</p>
-            <div class="header-actions">
-                <button id="stackBtn" class="ctrl-btn"><span data-i18n="buildStack">arma tu stack</span></button>
-                <button id="suggestBtn" class="ctrl-btn"><span data-i18n="suggest">Sugerir herramienta</span></button>
-            </div>
-        </header>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="buscar...">
+    </div>
 
-        <div class="search-container">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Buscar marcadores...">
-                <span class="search-icon">🔍</span>
-            </div>
+    <nav class="nav-section" aria-labelledby="lblCategories">
+      <div class="nav-label" id="lblCategories">categorías</div>
+      <div id="categoryNav"></div>
+    </nav>
+
+    <nav class="nav-section" aria-labelledby="lblPricing">
+      <div class="nav-label" id="lblPricing">precio</div>
+      <div id="pricingNav"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="stack-cta" id="stackBtn">
+        <span>⌘</span>
+        <span id="lblStack">arma tu stack</span>
+        <span class="arrow">→</span>
+      </button>
+      <button class="sub-action" id="favToggle">
+        <span>♥</span>
+        <span id="lblFavs">favs</span>
+      </button>
+      <button class="sub-action" id="suggestBtn">
+        <span>+</span>
+        <span id="lblSuggest">sugerir herramienta</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main>
+    <div class="content">
+      <div class="page-header">
+        <h1 class="page-title" id="pageTitle">Marcadores de IA</h1>
+        <p class="page-sub" id="pageSub">Mi selección de herramientas de IA gratuitas o freemium. Probadas y recomendadas.</p>
+        <div class="meta-row">
+          <div class="meta-counter" id="counter">// 0 / 0</div>
+          <div class="active-filters" id="activeFilters"></div>
+          <div class="sort-wrap">
+            <button class="sort-btn" id="sortBtn">
+              <span id="sortLabel">ordenar</span>
+              <span class="chevron">▾</span>
+            </button>
+            <div class="sort-menu" id="sortMenu"></div>
+          </div>
         </div>
-
-        <div class="categories" id="categories"></div>
-
-        <div class="pricing-filter" id="pricingFilter"></div>
-
-        <div class="sort-bar" id="sortBar"></div>
-
-        <p class="results-counter" id="resultsCounter"></p>
-
-        <div class="bookmarks-grid" id="bookmarksGrid"></div>
-        <div class="no-results" id="noResults" style="display: none;">
-            No se encontraron marcadores que coincidan con tu búsqueda.
-        </div>
-
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" style="display:none">
+        <div id="emptyText">// no results</div>
+      </div>
     </div>
 
     <footer>
-        <span class="footer-prompt">$</span>
-        <p>Marcadores de IA - 2026 | made by iamLudok</p>
+      <span class="footer-prompt">$</span>
+      <p id="footerText">Marcadores de IA · 2026 · made by iamLudok</p>
     </footer>
+  </main>
+</div>
 
-    <!-- Stack Builder Modal -->
-    <div id="stackModal" class="stack-overlay" aria-hidden="true">
-        <div class="stack-terminal">
-            <div class="stack-bar">
-                <span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span>
-                <span class="stack-bar-title">~/tools/build-stack.sh</span>
-                <button class="stack-close" id="stackClose">×</button>
-            </div>
-            <div class="stack-body" id="stackBody"></div>
-        </div>
-    </div>
 
-    <!-- Screensaver -->
-    <div id="screensaver" class="screensaver" aria-hidden="true">
-        <span class="screensaver-hint">// press any key</span>
-    </div>
+<!-- Stack panel -->
+<div class="stack-backdrop" id="stackBackdrop"></div>
+<aside class="stack-panel" id="stackPanel" aria-label="Stack builder">
+  <div class="stack-bar">
+    <span class="s-dot"></span><span class="s-dot"></span><span class="s-dot"></span>
+    <span class="stack-bar-title">~/tools/build-stack.sh</span>
+    <button class="stack-close" id="stackClose">×</button>
+  </div>
+  <div class="stack-progress" id="stackProgress">
+    <div class="step current"></div>
+    <div class="step"></div>
+    <div class="step"></div>
+  </div>
+  <div class="stack-body" id="stackBody"></div>
+  <div class="stack-foot">
+    <button class="stack-back" id="stackBack" style="visibility:hidden">← atrás</button>
+    <span class="meta-counter" id="stackProgressLabel">// 1 / 3</span>
+  </div>
+</aside>
 
-    <script src="app.js"></script>
+<!-- Screensaver -->
+<div id="screensaver" class="screensaver" aria-hidden="true">
+  <span class="screensaver-hint">// press any key</span>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,605 +1,440 @@
-const CATEGORIES = ['general', 'code', 'webdev', 'image', 'music', 'video', 'voice', 'humanizer', 'allinone', 'presentations', 'travel', 'automation', 'ragstack', 'privacy'];
-
-const i18n = {
-    es: {
-        title: "Marcadores de IA",
-        subtitle: "Mi selección de herramientas de IA gratuitas o freemium. Probadas y recomendadas.",
-        search: "Buscar marcadores...",
-        noResults: "No se encontraron marcadores que coincidan con tu búsqueda.",
-        visit: "Visitar sitio",
-        footer: "Marcadores de IA - 2026 | made by iamLudok",
-        suggest: "sugerir herramienta",
-        resultsCounter: "Mostrando {filtered} de {total} herramientas",
-        cat: { all: "Todos", general: "General", code: "Código", webdev: "Desarrollo Web", image: "Imagen", music: "Música", video: "Video", voice: "Voz", humanizer: "Humanizador", allinone: "Muchos en uno", presentations: "Presentaciones", travel: "Viajes", automation: "Automatizaciones", ragstack: "RAG Stack", privacy: "Privacidad" },
-        pricing: { free: "Gratis", freemium: "Limitado" },
-        newLabel: "nuevo",
-        recommended: "Recomendado",
-        favBtn: "favoritos",
-        noFavorites: "Aún no tienes favoritos. Pulsa ♥ en cualquier herramienta.",
-        sortLabel: "ordenar:",
-        sort: { default: "por defecto", az: "A-Z", newest: "nuevas", recommended: "⭐ primero" },
-        buildStack: "arma tu stack"
-    },
-    en: {
-        title: "AI Bookmarks",
-        subtitle: "My selection of free or freemium AI tools. Tested and recommended.",
-        search: "Search bookmarks...",
-        noResults: "No bookmarks found matching your search.",
-        visit: "Visit site",
-        footer: "AI Bookmarks - 2026 | made by iamLudok",
-        suggest: "suggest tool",
-        resultsCounter: "Showing {filtered} of {total} tools",
-        cat: { all: "All", general: "General", code: "Code", webdev: "Web Development", image: "Image", music: "Music", video: "Video", voice: "Voice", humanizer: "Humanizer", allinone: "Many in one", presentations: "Presentations", travel: "Travel", automation: "Automation", ragstack: "RAG Stack", privacy: "Privacy" },
-        pricing: { free: "Free", freemium: "Limited" },
-        newLabel: "new",
-        recommended: "Recommended",
-        favBtn: "favorites",
-        noFavorites: "No favorites yet. Press ♥ on any tool.",
-        sortLabel: "sort:",
-        sort: { default: "default", az: "A-Z", newest: "new", recommended: "⭐ first" },
-        buildStack: "build your stack"
-    },
-    eu: {
-        title: "AA Laster-markak",
-        subtitle: "Nire AA tresna doako edo freemium hautapena. Probatutakoak eta gomendatuak.",
-        search: "Laster-markak bilatu...",
-        noResults: "Ez da zure bilaketarekin bat datorren laster-markarik aurkitu.",
-        visit: "Gunea bisitatu",
-        footer: "AA Laster-markak - 2026 | made by iamLudok",
-        suggest: "tresna iradoki",
-        resultsCounter: "{filtered} erakusten {total}-(e)tik",
-        cat: { all: "Denak", general: "Orokorra", code: "Kodea", webdev: "Web Garapena", image: "Irudia", music: "Musika", video: "Bideoa", voice: "Ahotsa", humanizer: "Humanizatzailea", allinone: "Asko batean", presentations: "Aurkezpenak", travel: "Bidaiak", automation: "Automatizazioak", ragstack: "RAG Stack", privacy: "Pribatutasuna" },
-        pricing: { free: "Doakoa", freemium: "Mugatua" },
-        newLabel: "berria",
-        recommended: "Gomendatua",
-        favBtn: "gogokoak",
-        noFavorites: "Oraindik ez duzu gogokoerik. Sakatu ♥ edozein tresnan.",
-        sortLabel: "ordenatu:",
-        sort: { default: "lehenetsia", az: "A-Z", newest: "berriak", recommended: "⭐ lehenik" },
-        buildStack: "zure stack-a eraiki"
-    }
+const state = {
+  lang:      localStorage.getItem('lang') || 'es',
+  category:  'all',
+  pricing:   'all',
+  sort:      'default',
+  favOnly:   false,
+  search:    '',
+  favorites: new Set(JSON.parse(localStorage.getItem('favorites') || '[]')),
+  stackStep: 0,
+  stackAnswers: {}
 };
-
-const bookmarks = [
-    { title: "ChatGPT", url: "https://chat.openai.com", cat: ["general"], pricing: "freemium", limit: { es: "Mensajes limitados con modelos potentes; al agotarlos, solo modelos gratuitos.", en: "Limited messages with powerful models; once used up, free models only.", eu: "Mezu mugatuak eredu indartsuetan; agortutakoan, eredu doakoak soilik." }, desc: { es: "El clásico. Perfecto para cualquier cosa: escribir, investigar, resolver dudas. El más versátil.", en: "The classic. Perfect for anything: writing, research, solving questions. The most versatile.", eu: "Klasikoa. Edozer gauzetarako ezin hobea: idatzi, ikertu, zalantzak argitu. Polifazetikoena." }},
-    { title: "Perplexity", url: "https://perplexity.ai", cat: ["general"], pricing: "freemium", desc: { es: "Como Google pero te da la respuesta directa con fuentes. Ideal para investigar rápido.", en: "Like Google but gives you the direct answer with sources. Ideal for quick research.", eu: "Google bezala baina erantzun zuzena ematen dizu ituriekin. Azkar ikertzeko aproposa." }},
-    { title: "NotebookLM", url: "https://notebooklm.google/", cat: ["general"], pricing: "free", desc: { es: "El asistente de Google para investigar. Sube PDFs, webs o textos y te genera resúmenes, respuestas y hasta podcasts.", en: "Google's research assistant. Upload PDFs, websites or texts and it generates summaries, answers and even podcasts.", eu: "Googleren ikerketa-laguntzailea. Igo PDFak, webak edo testuak eta laburpenak, erantzunak eta baita podcastak ere sortzen dizkizu." }},
-    { title: "Claude", url: "https://claude.ai", cat: ["code"], pricing: "freemium", recommended: true, desc: { es: "Mi favorito para programar. Entiende el contexto mejor que nadie y no se pierde en proyectos grandes.", en: "My favorite for coding. Understands context better than anyone and doesn't get lost in big projects.", eu: "Nire gogokoena programatzeko. Testuingurua inork baino hobeto ulertzen du eta ez da galtzen proiektu handietan." }},
-    { title: "Opencode", url: "https://opencode.ai", cat: ["code"], pricing: "free", desc: { es: "Agente de código en terminal. Open source y con soporte para múltiples modelos de IA.", en: "Terminal-based coding agent. Open source with support for multiple AI models.", eu: "Kode-agentea terminalean. Kode irekia eta AA eredu anitzentzako euskarriarekin." }},
-    { title: "Lovable", url: "https://lovable.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "El más fácil para empezar. En minutos tienes algo funcional y bonito sin tocar código.", en: "In minutes you have something functional and beautiful without touching code.", eu: "Hasteko errazena. Minututan zerbait funtzionala eta polita duzu koderik ukitu gabe." }},
-    { title: "Bubble", url: "https://bubble.io", cat: ["webdev"], pricing: "freemium", desc: { es: "Más complejo pero muy potente. Para apps serias sin saber programar.", en: "More complex but very powerful. For serious apps without knowing how to code.", eu: "Konplexuagoa baina oso indartsua. App serioetarako programatzen jakin gabe." }},
-    { title: "v0", url: "https://v0.dev", cat: ["webdev"], pricing: "freemium", desc: { es: "Mi favorito para crear aplicaciones mediante lenguaje natural.", en: "My favorite for creating applications using natural language.", eu: "Nire gogokoena aplikazioak hizkuntza naturalaren bidez sortzeko." }},
-    { title: "Bolt", url: "https://bolt.new", cat: ["webdev"], pricing: "freemium", desc: { es: "Rápido para prototipos. Se queda corto en proyectos grandes pero para empezar va genial.", en: "Fast for prototypes. Falls short on big projects but great for starting out.", eu: "Azkarra prototipoetarako. Proiektu handietan motz geratzen da baina hasteko bikaina." }},
-    { title: "Replit", url: "https://replit.com", cat: ["webdev"], pricing: "freemium", desc: { es: "Una de las mejores herramientas para vibe coding cuando lo que buscas no es perfección técnica inmediata, sino fluidez, ritmo y ganas de crear.", en: "One of the best tools for vibe coding when what you seek is not immediate technical perfection, but flow, rhythm, and the desire to create.", eu: "Vibe coding-erako tresnarik onenetakoa, perfekzio teknikoa baino jariakortasuna, erritmoa eta sortzeko gogoa bilatzen duzunean." }},
-    { title: "Make", url: "https://www.make.com", cat: ["automation"], pricing: "freemium", desc: { es: "Automatiza flujos de trabajo conectando apps sin código. Ideal para integrar servicios y crear procesos automáticos.", en: "Automate workflows by connecting apps without code. Ideal for integrating services and creating automatic processes.", eu: "Lan-fluxuak automatizatzen ditu appak koderik gabe konektatuz. Zerbitzuak integratzeko eta prozesu automatikoak sortzeko aproposa." }},
-    { title: "Zapier", url: "https://zapier.com", cat: ["automation"], pricing: "freemium", desc: { es: "El veterano de las automatizaciones. Conecta miles de apps y crea flujos automáticos en minutos.", en: "The veteran of automation. Connect thousands of apps and create automatic workflows in minutes.", eu: "Automatizazioen beteranoa. Milaka app konektatzen ditu eta fluxu automatikoak sortzen minututan." }},
-    { title: "N8N", url: "https://n8n.io", cat: ["automation"], pricing: "freemium", desc: { es: "Automatización open source y self-hosteable. Flujos visuales con lógica avanzada y cientos de integraciones.", en: "Open source and self-hostable automation. Visual workflows with advanced logic and hundreds of integrations.", eu: "Automatizazio kode irekia eta self-hosteable. Fluxu bisualak logika aurreratuarekin eta ehunka integraziorekin." }},
-    { title: "Napkin", url: "https://app.napkin.ai", cat: ["image"], pricing: "freemium", desc: { es: "Convierte texto en diagramas e infografías automáticamente. Perfecto para visualizar ideas rápidamente.", en: "Converts text into diagrams and infographics automatically. Perfect for visualizing ideas quickly.", eu: "Testua diagrama eta infografietan bihurtzen du automatikoki. Ideiak azkar bistaratzeko ezin hobea." }},
-    { title: "Suno", url: "https://suno.ai", cat: ["music"], pricing: "freemium", desc: { es: "Creas canciones completas con solo describirlas. Los resultados sorprenden bastante.", en: "Create complete songs just by describing them. The results are quite surprising.", eu: "Abesti osoak sortzen dituzu deskribatzearekin soilik. Emaitzek nahiko harritu egiten dute." }},
-    { title: "Udio", url: "https://udio.com", cat: ["music"], pricing: "freemium", desc: { es: "Alternativa a Suno con mejor calidad de audio según algunos. Vale la pena probarlo.", en: "Alternative to Suno with better audio quality according to some. Worth trying.", eu: "Sunoren alternatiba audio kalitate hobearekin batzuen arabera. Probatzea merezi du." }},
-    { title: "Runway", url: "https://runwayml.com", cat: ["video"], pricing: "freemium", desc: { es: "El más conocido para video. Efectos visuales impresionantes y fácil de usar.", en: "The most well-known for video. Impressive visual effects and easy to use.", eu: "Bideorako ezagunena. Efektu bisual ikusgarriak eta erraz erabiltzekoa." }},
-    { title: "Pika", url: "https://pika.art", cat: ["video"], pricing: "freemium", desc: { es: "Videos cortos con estilo más artístico. Bueno para contenido creativo y diferente.", en: "Short videos with a more artistic style. Good for creative and different content.", eu: "Bideo laburrak estilo artistikoagoarekin. Eduki sortzaile eta ezberdinerako ona." }},
-    { title: "Narakeet", url: "https://narakeet.com", cat: ["video", "voice"], pricing: "freemium", recommended: true, desc: { es: "Voces muy naturales en muchos idiomas. Lo uso para narrar videos sin grabar.", en: "Very natural voices in many languages. I use it to narrate videos without recording.", eu: "Ahots oso naturalak hizkuntza askotan. Bideoak grabatu gabe kontatzeko erabiltzen dut." }},
-    { title: "ElevenLabs", url: "https://elevenlabs.io", cat: ["voice", "music"], pricing: "freemium", desc: { es: "La mejor calidad de voz sintética. Clona voces, genera audio hiperrealista, crea canciones y efectos de sonido.", en: "The best synthetic voice quality. Clone voices, generate hyperrealistic audio, create songs and sound effects.", eu: "Ahots sintetikoaren kalitaterik onena. Ahotsak klonatzen ditu, audio hiperrealista sortzen, abestiak eta soinu-efektuak sortzen." }},
-    { title: "Tenorshare AI", url: "https://ai.tenorshare.com/products/ai-bypass", cat: ["humanizer"], pricing: "freemium", desc: { es: "Hace que textos de IA pasen desapercibidos. Útil si necesitas que suene más natural.", en: "Makes AI texts go unnoticed. Useful if you need it to sound more natural.", eu: "AA testuak oharkabean pasarazten ditu. Baliagarria naturalago entzun behar bada." }},
-    { title: "Genspark", url: "https://www.genspark.ai/", cat: ["allinone"], pricing: "freemium", desc: { es: "Motor de búsqueda con IA que combina múltiples LLMs. Su Super Agent automatiza tareas complejas: crea slides, documentos, e incluso hace llamadas por ti.", en: "AI search engine combining multiple LLMs. Its Super Agent automates complex tasks: creates slides, documents, and even makes phone calls for you.", eu: "LLM anitz konbinatzen dituen AA bilaketa-motorra. Bere Super Agentek ataza konplexuak automatizatzen ditu: diapositibak, dokumentuak sortzen ditu, eta baita deiak egiten ere zuretzat." }},
-    { title: "ChatHub", url: "https://app.chathub.gg/", cat: ["allinone"], pricing: "free", desc: { es: "Todos los modelos en un solo lugar. Perfecto para comparar respuestas lado a lado.", en: "All models in one place. Perfect for comparing responses side by side.", eu: "Eredu guztiak toki bakarrean. Erantzunak elkarren ondoan konparatzeko ezin hobea." }},
-    { title: "LMArena", url: "https://lmarena.ai", cat: ["allinone"], pricing: "free", desc: { es: "Pruebas a ciegas entre modelos. Interesante para ver cuál prefieres sin saber cuál es cuál.", en: "Blind tests between models. Interesting to see which one you prefer without knowing which is which.", eu: "Ereduen arteko proba itsuak. Interesgarria zein nahiago duzun ikusteko zein den zein jakin gabe." }},
-    { title: "Google AI Studio", url: "https://aistudio.google.com", cat: ["allinone"], pricing: "free", desc: { es: "Herramienta oficial de Google para usar sus modelos de IA como Gemini o Nano Banana.", en: "Google's official tool to use their AI models like Gemini or Nano Banana.", eu: "Googleren tresna ofiziala bere AA ereduak erabiltzeko, hala nola Gemini edo Nano Banana." }},
-    { title: "HuggingFace Spaces", url: "https://huggingface.co/spaces", cat: ["allinone"], pricing: "free", desc: { es: "Miles de modelos para probar gratis. El playground definitivo para explorar IA.", en: "Thousands of models to try for free. The ultimate playground for exploring AI.", eu: "Milaka eredu doan probatzeko. AA esploratzeko jolasleku definitiboa." }},
-    { title: "Gamma", url: "https://gamma.app", cat: ["presentations"], pricing: "freemium", desc: { es: "Presentaciones en segundos. Le dices el tema y te genera algo presentable al instante.", en: "Presentations in seconds. You tell it the topic and it generates something presentable instantly.", eu: "Aurkezpenak segundotan. Gaia esaten diozu eta berehala zerbait aurkezgarria sortzen du." }},
-    { title: "Visme", url: "https://visme.co", cat: ["presentations"], pricing: "freemium", desc: { es: "Más control sobre el diseño que Gamma. Para cuando quieres algo más personalizado.", en: "More control over design than Gamma. For when you want something more customized.", eu: "Gammak baino kontrol gehiago diseinuan. Zerbait pertsonalizatuagoa nahi duzunerako." }},
-    { title: "PPT", url: "https://ppt.ai/", cat: ["presentations"], pricing: "freemium", desc: { es: "Storytelling visual con IA. Crea presentaciones narrativas con un estilo moderno y atractivo.", en: "Visual storytelling with AI. Create narrative presentations with a modern and attractive style.", eu: "Storytelling bisuala AArekin. Aurkezpen narratiboak sortzen ditu estilo moderno eta erakargarriarekin." }},
-    { title: "Vacay Chatbot", url: "https://usevacay.com", cat: ["travel"], pricing: "free", desc: { es: "Te arma itinerarios completos en segundos. Sorprendentemente útil para planificar.", en: "Builds complete itineraries in seconds. Surprisingly useful for planning.", eu: "Ibilbide osoak segundotan prestatzen dizkizu. Harrigarriro baliagarria planifikatzeko." }},
-    { title: "GuideGeek", url: "https://guidegeek.com", cat: ["travel"], pricing: "free", desc: { es: "Como tener un guía local que te responde cualquier duda sobre tu destino.", en: "Like having a local guide who answers any question about your destination.", eu: "Bertako gida bat izatea bezala, zure helmugari buruzko edozein zalantza erantzuten dizuna." }},
-    { title: "Curiosio", url: "https://curiosio.com", cat: ["travel"], pricing: "free", desc: { es: "Especializado en road trips. Te sugiere rutas alternativas y lugares que no conocías.", en: "Specialized in road trips. Suggests alternative routes and places you didn't know.", eu: "Road trip-etan espezializatua. Ibilbide alternatiboak eta ezagutzen ez zenituen lekuak iradokitzen dizkizu." }},
-    { title: "LangChain", url: "https://www.langchain.com/", cat: ["ragstack"], pricing: "free", desc: { es: "Framework open source para construir aplicaciones con LLMs. Conecta modelos, herramientas y datos para crear agentes y flujos de IA.", en: "Open source framework for building applications with LLMs. Connect models, tools and data to create AI agents and workflows.", eu: "LLMekin aplikazioak eraikitzeko kode irekiko frameworka. Ereduak, tresnak eta datuak konektatzen ditu AA agenteak eta lan-fluxuak sortzeko." }},
-    { title: "LangSmith", url: "https://smith.langchain.com/", cat: ["ragstack"], pricing: "freemium", desc: { es: "Plataforma para evaluar, monitorizar y depurar aplicaciones con LLMs. Imprescindible para medir la calidad de tus agentes.", en: "Platform for evaluating, monitoring and debugging LLM applications. Essential for measuring the quality of your agents.", eu: "LLM aplikazioak ebaluatu, monitorizatu eta arazteko plataforma. Ezinbestekoa zure agenteen kalitatea neurtzeko." }},
-    { title: "CrewAI", url: "https://www.crewai.com/", cat: ["ragstack"], pricing: "freemium", desc: { es: "Framework para crear equipos de agentes de IA que colaboran entre sí. Define roles, tareas y flujos para resolver problemas complejos.", en: "Framework for creating teams of AI agents that collaborate with each other. Define roles, tasks and workflows to solve complex problems.", eu: "Elkarrekin lankidetzan aritzen diren AA agente taldeak sortzeko frameworka. Rolak, atazak eta lan-fluxuak definitzen ditu arazo konplexuak ebazteko." }},
-    { title: "Gemini", url: "https://gemini.google.com/app", cat: ["general"], pricing: "freemium", desc: { es: "El asistente de Google. Potente para investigar, escribir y razonar. Integrado con el ecosistema Google.", en: "Google's assistant. Powerful for research, writing and reasoning. Integrated with the Google ecosystem.", eu: "Googleren laguntzailea. Indartsua ikertzeko, idazteko eta arrazoitzeko. Google ekosistemarekin integratua." }},
-    { title: "GitHub Copilot", url: "https://github.com/features/copilot", cat: ["code"], pricing: "freemium", desc: { es: "El copiloto de GitHub para programar. Autocompletado inteligente y sugerencias de código directamente en tu editor.", en: "GitHub's coding copilot. Smart autocompletion and code suggestions directly in your editor.", eu: "GitHuben kode-kopilotua. Autoosaketa adimentsua eta kode-iradokizunak zuzenean zure editorean." }},
-    { title: "Veed", url: "https://www.veed.io/", cat: ["video"], pricing: "freemium", desc: { es: "Editor de video online con IA. Subtítulos automáticos, recortes y efectos sin instalar nada.", en: "Online video editor with AI. Automatic subtitles, trimming and effects without installing anything.", eu: "Lineako bideo-editorea AArekin. Azpitituluak automatikoak, mozteak eta efektuak ezer instalatu gabe." }},
-    { title: "HeyGen", url: "https://app.heygen.com/", cat: ["video"], pricing: "freemium", desc: { es: "Crea videos con avatares realistas que hablan por ti. Ideal para presentaciones, formación y contenido sin ponerte delante de la cámara.", en: "Create videos with realistic avatars that speak for you. Ideal for presentations, training and content without being on camera.", eu: "Zuretzat hitz egiten duten avatar errealistekin bideoak sortzen ditu. Aurkezpenetarako, prestakuntzarako eta kameraren aurrean jarri gabe edukia sortzeko aproposa." }},
-    { title: "Ollama", url: "https://ollama.com", cat: ["privacy", "ragstack"], pricing: "free", recommended: true, addedAt: "2026-05-07", desc: { es: "Ejecuta modelos de IA en tu propia máquina. Tus datos no salen a ningún servidor. La alternativa privada a ChatGPT para quien no quiere que nadie lea sus conversaciones.", en: "Run AI models on your own machine. Your data never leaves your computer. The private alternative to ChatGPT for those who don't want anyone reading their conversations.", eu: "AA ereduak zure makinan exekutatzen ditu. Zure datuak ez dira inongo zerbitzarira joaten. ChatGPT-ren alternatiba pribatua, inork zure elkarrizketak irakurri nahi ez dituenarentzat." }},
-    { title: "Brave Browser", url: "https://brave.com", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Navegador que bloquea rastreadores y anuncios por defecto. Si usas herramientas de IA desde Chrome, Google puede registrar qué buscas. Con Brave, no.", en: "Browser that blocks trackers and ads by default. If you use AI tools from Chrome, Google can log what you search. With Brave, it can't.", eu: "Nabigatzaileak jarraipen-gailuak eta iragarkiak blokeatzen ditu lehenespenez. AA tresnak Chrome-tik erabiltzen badituzu, Googlek zer bilatzen duzun erregistra dezake. Brave-rekin, ez." }},
-    { title: "Bitwarden", url: "https://bitwarden.com", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Gestor de contraseñas open source y gratuito. Si usas 20 herramientas de IA con la misma contraseña y una filtra, te hackean todo. Con Bitwarden, cada cuenta tiene su contraseña única.", en: "Free and open source password manager. If you use 20 AI tools with the same password and one leaks, everything gets hacked. With Bitwarden, each account has its own unique password.", eu: "Pasahitz-kudeatzaile doako eta kode irekikoa. 20 AA tresna pasahitz berdinarekin erabiltzen badituzu eta batek filtratu egiten badu, dena hackeatu egingo dizute. Bitwarden-ekin, kontu bakoitzak bere pasahitz bakarra du." }},
-    { title: "Have I Been Pwned", url: "https://haveibeenpwned.com", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Comprueba si tu correo o contraseña han aparecido en alguna filtración de datos. Si te has registrado en muchas webs de IA, esto es lo primero que deberías mirar.", en: "Check if your email or password has appeared in any data breach. If you've signed up for many AI sites, this is the first thing you should check.", eu: "Egiaztatu zure posta elektronikoa edo pasahitza datu-filtrazio batean agertu den. AA webune askotan izena eman baduzu, hau da lehenengo begiratu behar duzuna." }},
-    { title: "JustDeleteMe", url: "https://justdeleteme.xyz", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Directorio de enlaces directos para eliminar tu cuenta de cientos de servicios web. Clasificados por dificultad: algunos te dejan borrarla en un clic, otros lo ponen muy difícil.", en: "Directory of direct links to delete your account from hundreds of web services. Rated by difficulty: some let you delete in one click, others make it very hard.", eu: "Ehunka web-zerbitzutatik zure kontua ezabatzeko esteka zuzenen direktorioa. Zailtasunaren arabera sailkatuta: batzuek klik batean ezabatzeko aukera ematen dizute, beste batzuek oso zaila egiten dute." }},
-    { title: "Google Takeout", url: "https://takeout.google.com", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Descarga todo lo que Google tiene sobre ti: búsquedas, historial de ubicación, YouTube, Gmail, Maps y mucho más. La mayoría de la gente alucina con la cantidad de datos que hay.", en: "Download everything Google has on you: searches, location history, YouTube, Gmail, Maps and much more. Most people are shocked by the sheer amount of data.", eu: "Deskargatu Googlek zuri buruz duen guztia: bilaketak, kokapen-historia, YouTube, Gmail, Maps eta askoz gehiago. Jende gehienak harrituta geratzen da dagoen datu kopuruarekin." }},
-    { title: "Google My Activity", url: "https://myactivity.google.com", cat: ["privacy"], pricing: "free", addedAt: "2026-05-07", desc: { es: "Ve y borra tu historial de actividad en Google: qué buscaste, qué viste en YouTube, qué le dijiste al Asistente. Puedes configurar el borrado automático desde aquí.", en: "View and delete your Google activity history: what you searched, what you watched on YouTube, what you said to the Assistant. You can set up automatic deletion from here.", eu: "Ikusi eta ezabatu zure Google jarduera-historia: zer bilatu zenuen, YouTube-n zer ikusi zenuen, Laguntzaileari zer esan zenion. Hemen ezar dezakezu ezabatze automatikoa." }}
-];
-
-let lang = localStorage.getItem('lang') || 'es', category = 'all', search = '', pricingFilter = 'all', showFavorites = false, sortOrder = 'default';
-let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
-const t = () => i18n[lang];
+const t = () => I18N[state.lang];
 
-function toggleFavorite(url) {
-    if (favorites.has(url)) favorites.delete(url);
-    else favorites.add(url);
-    localStorage.setItem('favorites', JSON.stringify([...favorites]));
-    render();
-}
-
-function sortBookmarks(arr) {
-    if (sortOrder === 'default') return arr;
-    const copy = [...arr];
-    if (sortOrder === 'az') return copy.sort((a, b) => a.title.localeCompare(b.title));
-    if (sortOrder === 'newest') return copy.sort((a, b) => {
-        if (!a.addedAt && !b.addedAt) return 0;
-        if (!a.addedAt) return 1;
-        if (!b.addedAt) return -1;
-        return new Date(b.addedAt) - new Date(a.addedAt);
-    });
-    if (sortOrder === 'recommended') return copy.sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0));
-    return arr;
-}
-
-function isNew(addedAt) {
-    if (!addedAt) return false;
-    return (Date.now() - new Date(addedAt).getTime()) / 86400000 <= 30;
-}
-
-function highlight(text, term) {
-    if (!term) return text;
-    const escaped = term.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-    return text.replaceAll(new RegExp(escaped, 'gi'), m => `<mark class="search-hl">${m}</mark>`);
-}
-
-function render() {
-    let filtered = bookmarks.filter(b =>
-        (category === 'all' || b.cat.includes(category)) &&
-        (pricingFilter === 'all' || b.pricing === pricingFilter) &&
-        (!showFavorites || favorites.has(b.url)) &&
-        (b.title.toLowerCase().includes(search) || b.desc[lang].toLowerCase().includes(search))
-    );
-    filtered = sortBookmarks(filtered);
-
-    const grid = $('#bookmarksGrid');
-    const noRes = $('#noResults');
-
-    grid.style.display = filtered.length ? 'grid' : 'none';
-    noRes.style.display = filtered.length ? 'none' : 'block';
-    if (!filtered.length) noRes.textContent = showFavorites && !search ? t().noFavorites : t().noResults;
-
-    const counter = $('#resultsCounter');
-    counter.textContent = t().resultsCounter
-        .replace('{filtered}', filtered.length)
-        .replace('{total}', bookmarks.length);
-    counter.style.display = filtered.length ? 'block' : 'none';
-
-    grid.innerHTML = filtered.map((b, i) => `
-        <div class="bookmark-card" style="animation-delay:${Math.min(i * 0.1, 0.3)}s">
-            <div class="bookmark-header">
-                <div>
-                    <div class="bookmark-tags">
-                        ${b.cat.map(c => `<span class="bookmark-category" data-cat="${c}">${t().cat[c]}</span>`).join('')}
-                        <span class="bookmark-pricing ${b.pricing}" data-pricing="${b.pricing}"${b.limit ? ` data-tooltip="${b.limit[lang]}"` : ''}>${t().pricing[b.pricing]}</span>
-                        ${isNew(b.addedAt) ? `<span class="bookmark-new">${t().newLabel}</span>` : ''}
-                        ${b.recommended ? `<span class="bookmark-recommended">⭐ ${t().recommended}</span>` : ''}
-                    </div>
-                    <h3 class="bookmark-title">${b.title}</h3>
-                </div>
-                <img class="bookmark-logo" src="https://www.google.com/s2/favicons?domain=${new URL(b.url).hostname}&sz=64" alt="${b.title}">
-            </div>
-            <p class="bookmark-description">${highlight(b.desc[lang], search)}</p>
-            <div class="bookmark-footer">
-                <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="bookmark-link">${t().visit}</a>
-                <button class="bookmark-fav${favorites.has(b.url) ? ' active' : ''}" data-url="${b.url}" aria-label="favorito">♥</button>
-            </div>
-        </div>
-    `).join('');
-
-    updateCatCounts();
-
-    const favBtn = $('#favToggleBtn');
-    if (favBtn) {
-        const count = favorites.size ? ` (${favorites.size})` : '';
-        favBtn.textContent = `♥ ${t().favBtn}${count}`;
-    }
-}
-
-function updateUI() {
-    $('h1').textContent = t().title;
-    $('.subtitle').textContent = t().subtitle;
-    $('#searchInput').placeholder = t().search;
-    $('#noResults').textContent = t().noResults;
-    $('footer p').textContent = t().footer;
-    $('[data-i18n="suggest"]').textContent = t().suggest;
-    $('[data-i18n="buildStack"]').textContent = t().buildStack;
-    document.documentElement.lang = lang;
-    updateCatCounts();
-    initPricingFilter();
-    initSortBar();
-    render();
-}
-
-function filterByCategory(cat) {
-    category = cat;
-    $$('.category-btn').forEach(b => b.classList.toggle('active', b.dataset.category === cat));
-    render();
+// =============================================
+// FILTERING & SORTING
+// =============================================
+function filtered() {
+  let arr = BOOKMARKS.filter(b => {
+    const q = state.search.toLowerCase();
+    return (state.category === 'all' || b.cat.includes(state.category)) &&
+           (state.pricing  === 'all' || b.pricing === state.pricing) &&
+           (!state.favOnly || state.favorites.has(b.url)) &&
+           (!q || b.title.toLowerCase().includes(q) || b.desc[state.lang].toLowerCase().includes(q));
+  });
+  if (state.sort === 'az') arr.sort((a, b) => a.title.localeCompare(b.title));
+  else if (state.sort === 'newest') arr.sort((a, b) => {
+    if (!a.addedAt && !b.addedAt) return 0;
+    if (!a.addedAt) return 1;
+    if (!b.addedAt) return -1;
+    return new Date(b.addedAt) - new Date(a.addedAt);
+  });
+  else if (state.sort === 'recommended') arr.sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0));
+  return arr;
 }
 
 function catCount(c) {
-    const base = bookmarks.filter(b =>
-        (pricingFilter === 'all' || b.pricing === pricingFilter) &&
-        (!showFavorites || favorites.has(b.url))
-    );
-    return c === 'all' ? base.length : base.filter(b => b.cat.includes(c)).length;
+  return BOOKMARKS.filter(b =>
+    (state.pricing === 'all' || b.pricing === state.pricing) &&
+    (!state.favOnly || state.favorites.has(b.url)) &&
+    (c === 'all' || b.cat.includes(c))
+  ).length;
+}
+function priceCount(p) {
+  return BOOKMARKS.filter(b =>
+    (state.category === 'all' || b.cat.includes(state.category)) &&
+    (!state.favOnly || state.favorites.has(b.url)) &&
+    (p === 'all' || b.pricing === p)
+  ).length;
 }
 
-function updateCatCounts() {
-    $$('.category-btn').forEach(btn => {
-        const c = btn.dataset.category;
-        btn.innerHTML = `${t().cat[c]}<span class="cat-count">${catCount(c)}</span>`;
+function highlight(text) {
+  if (!state.search) return text;
+  const re = new RegExp(state.search.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`), 'gi');
+  return text.replace(re, m => `<mark class="hl">${m}</mark>`);
+}
+
+// =============================================
+// RENDER FUNCTIONS
+// =============================================
+function renderCategoryNav() {
+  const cats = ['all', ...CATEGORIES];
+  $('#categoryNav').innerHTML = cats.map(c => `
+    <button class="nav-item${state.category === c ? ' active' : ''}" data-cat="${c}">
+      <span class="glyph">${c === 'all' ? '*' : '›'}</span>
+      <span>${t().cat[c]}</span>
+      <span class="count">${catCount(c)}</span>
+    </button>
+  `).join('');
+  $$('#categoryNav .nav-item').forEach(b => b.onclick = () => {
+    state.category = b.dataset.cat;
+    render();
+  });
+}
+
+function renderPricingNav() {
+  const prices = [
+    { v: 'all',      glyph: '*' },
+    { v: 'free',     glyph: '◦' },
+    { v: 'freemium', glyph: '◌' }
+  ];
+  $('#pricingNav').innerHTML = prices.map(p => `
+    <button class="nav-item${state.pricing === p.v ? ' active' : ''}" data-price="${p.v}">
+      <span class="glyph">${p.glyph}</span>
+      <span>${t().price[p.v]}</span>
+      <span class="count">${priceCount(p.v)}</span>
+    </button>
+  `).join('');
+  $$('#pricingNav .nav-item').forEach(b => b.onclick = () => {
+    state.pricing = b.dataset.price;
+    render();
+  });
+}
+
+function renderSortMenu() {
+  const opts = ['default', 'az', 'newest', 'recommended'];
+  $('#sortMenu').innerHTML = opts.map(o => `
+    <button class="sort-option${state.sort === o ? ' active' : ''}" data-sort="${o}">
+      <span class="check">✓</span>
+      ${t().sort[o]}
+    </button>
+  `).join('');
+  $$('#sortMenu .sort-option').forEach(b => b.onclick = () => {
+    state.sort = b.dataset.sort;
+    $('#sortMenu').classList.remove('show');
+    render();
+  });
+  $('#sortLabel').textContent = t().sort[state.sort];
+}
+
+function renderActiveFilters() {
+  const chips = [];
+  if (state.category !== 'all') chips.push({ k: 'cat',    label: t().cat[state.category] });
+  if (state.pricing  !== 'all') chips.push({ k: 'price',  label: t().price[state.pricing] });
+  if (state.favOnly)            chips.push({ k: 'fav',    label: '♥ ' + t().favorites });
+  if (state.search)             chips.push({ k: 'search', label: `"${state.search}"` });
+  $('#activeFilters').innerHTML = chips.map(c =>
+    `<span class="chip">${c.label}<button class="x" data-k="${c.k}">×</button></span>`
+  ).join('');
+  $$('#activeFilters .x').forEach(x => x.onclick = () => {
+    const k = x.dataset.k;
+    if (k === 'cat')    state.category = 'all';
+    if (k === 'price')  state.pricing  = 'all';
+    if (k === 'fav')    state.favOnly  = false;
+    if (k === 'search') { state.search = ''; $('#searchInput').value = ''; }
+    render();
+  });
+}
+
+function renderGrid() {
+  const arr = filtered();
+  $('#empty').style.display = arr.length ? 'none' : 'block';
+  $('#grid').style.display  = arr.length ? 'grid' : 'none';
+  if (!arr.length) {
+    $('#emptyText').textContent = state.favOnly && !state.search
+      ? '// ' + t().noFavorites
+      : '// ' + t().noResults;
+  }
+  $('#grid').innerHTML = arr.map((b, i) => `
+    <article class="card" style="animation-delay:${Math.min(i * 0.02, 0.2)}s">
+      <div class="card-top">
+        <img class="card-logo" src="${favicon(b.url)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+        <div class="card-title-wrap">
+          <div class="card-title">
+            ${highlight(b.title)}
+            ${b.recommended ? '<span class="star">★</span>' : ''}
+          </div>
+          <div class="card-url">${new URL(b.url).hostname.replace(/^www\./, '')}</div>
+        </div>
+        <button class="fav-btn${state.favorites.has(b.url) ? ' active' : ''}" data-url="${b.url}" aria-label="favorito">
+          ${state.favorites.has(b.url) ? '♥' : '♡'}
+        </button>
+      </div>
+      <p class="card-desc">${highlight(b.desc[state.lang])}</p>
+      <div class="card-bottom">
+        ${b.cat.slice(0, 2).map(c => `<span class="pill cat" data-cat="${c}">${t().cat[c]}</span>`).join('')}
+        <span class="pill ${b.pricing}" data-price="${b.pricing}">${t().price[b.pricing]}</span>
+        ${isNew(b.addedAt) ? `<span class="pill new">${t().newLabel}</span>` : ''}
+        <a class="card-cta" href="${b.url}" target="_blank" rel="noopener noreferrer">${t().open} →</a>
+      </div>
+    </article>
+  `).join('');
+
+  $$('#grid .fav-btn').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const u = btn.dataset.url;
+    if (state.favorites.has(u)) state.favorites.delete(u);
+    else state.favorites.add(u);
+    localStorage.setItem('favorites', JSON.stringify([...state.favorites]));
+    render();
+  });
+  $$('#grid .pill.cat').forEach(p => p.onclick = e => {
+    e.stopPropagation(); state.category = p.dataset.cat; render();
+  });
+  $$('#grid .pill.free, #grid .pill.freemium').forEach(p => p.onclick = e => {
+    e.stopPropagation(); state.pricing = p.dataset.price; render();
+  });
+}
+
+function renderCounter() {
+  const arr = filtered();
+  $('#counter').textContent = `// ${arr.length} / ${BOOKMARKS.length} ${t().tools}`;
+}
+
+function renderFavToggle() {
+  $('#favToggle').classList.toggle('active', state.favOnly);
+  $('#lblFavs').textContent = t().favorites;
+}
+
+function renderLabels() {
+  $('#searchInput').placeholder = t().search;
+  $('#lblCategories').textContent     = t().categories;
+  $('#lblPricing').textContent        = t().pricing;
+  $('#lblFavs').textContent           = t().favorites;
+  $('#lblStack').textContent          = t().buildStack;
+  $('#lblSuggest').textContent        = t().suggest;
+  $('#footerText').textContent        = t().footer;
+  $('#pageTitle').textContent         = t().title;
+  $('#pageSub').textContent           = t().subtitle;
+  document.documentElement.lang      = state.lang;
+}
+
+function render() {
+  renderLabels();
+  renderCategoryNav();
+  renderPricingNav();
+  renderSortMenu();
+  renderActiveFilters();
+  renderFavToggle();
+  renderGrid();
+  renderCounter();
+}
+
+// =============================================
+// TOPBAR EVENTS
+// =============================================
+$('#sortBtn').onclick = e => { e.stopPropagation(); $('#sortMenu').classList.toggle('show'); };
+document.addEventListener('click', () => $('#sortMenu').classList.remove('show'));
+$('#favToggle').onclick = () => { state.favOnly = !state.favOnly; render(); };
+
+// =============================================
+// LANGUAGE
+// =============================================
+$$('.lang-btn').forEach(b => b.onclick = () => {
+  $$('.lang-btn').forEach(x => x.classList.toggle('active', x === b));
+  state.lang = b.dataset.lang;
+  localStorage.setItem('lang', state.lang);
+  render();
+});
+
+// =============================================
+// SUGGEST BUTTON
+// =============================================
+$('#suggestBtn').onclick = () => {
+  const titles = {
+    es: 'Sugerir: [Nombre de la herramienta]',
+    en: 'Suggest: [Tool name]',
+    eu: 'Iradoki: [Tresnaren izena]'
+  };
+  const bodies = {
+    es: `## Herramienta sugerida\n\n**Nombre:**\n\n**URL:**\n\n**Categoría:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)\n\n**Precio:** (free / freemium)\n\n**Descripción corta:**\n\n---\nGracias por tu sugerencia!`,
+    en: `## Suggested tool\n\n**Name:**\n\n**URL:**\n\n**Category:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)\n\n**Pricing:** (free / freemium)\n\n**Short description:**\n\n---\nThanks for your suggestion!`,
+    eu: `## Iradokitako tresna\n\n**Izena:**\n\n**URL:**\n\n**Kategoria:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)\n\n**Prezioa:** (free / freemium)\n\n**Deskribapen laburra:**\n\n---\nEskerrik asko zure iradokizunagatik!`
+  };
+  const title = encodeURIComponent(titles[state.lang]);
+  const body  = encodeURIComponent(bodies[state.lang]);
+  window.open(`https://github.com/iamLudok/ai-bookmarks/issues/new?title=${title}&body=${body}&labels=suggestion`, '_blank');
+};
+
+$('#searchInput').addEventListener('input', e => {
+  state.search = e.target.value;
+  renderGrid();
+  renderCounter();
+  renderActiveFilters();
+});
+
+// =============================================
+// STACK BUILDER
+// =============================================
+const STACK_STEPS = [
+  { key: 'usecase', q: 'qUsecase', dict: 'uc', opts: [
+    { v: 'content' }, { v: 'code' }, { v: 'automate' },
+    { v: 'research' }, { v: 'present' }, { v: 'travel' }, { v: 'privacy' }
+  ]},
+  { key: 'pricing', q: 'qPricing', dict: 'pp', opts: [{ v: 'free' }, { v: 'any' }] },
+  { key: 'level',   q: 'qLevel',   dict: 'lvl', opts: [{ v: 'basic' }, { v: 'advanced' }] }
+];
+
+function openStack() {
+  state.stackStep = 0;
+  state.stackAnswers = {};
+  renderStack();
+  $('#stackPanel').classList.add('show');
+  $('#stackBackdrop').classList.add('show');
+  resetInactivity();
+}
+function closeStack() {
+  $('#stackPanel').classList.remove('show');
+  $('#stackBackdrop').classList.remove('show');
+}
+
+function renderStack() {
+  const step = STACK_STEPS[state.stackStep];
+  $('#stackBack').style.visibility = state.stackStep === 0 ? 'hidden' : 'visible';
+  $$('#stackProgress .step').forEach((el, i) => {
+    el.classList.toggle('done',    i < state.stackStep);
+    el.classList.toggle('current', i === state.stackStep);
+  });
+  $('#stackProgressLabel').textContent = `// ${Math.min(state.stackStep + 1, 3)} / 3`;
+
+  if (state.stackStep < STACK_STEPS.length) {
+    $('#stackBody').innerHTML = `
+      <div class="stack-step-label">step ${state.stackStep + 1} / ${STACK_STEPS.length}</div>
+      <div class="stack-question">${t()[step.q]}</div>
+      <div class="stack-opts">
+        ${step.opts.map(o => `
+          <button class="stack-opt" data-key="${step.key}" data-val="${o.v}">
+            <span>${t()[step.dict][o.v]}</span>
+            <span class="o-arrow">→</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    $$('#stackBody .stack-opt').forEach(b => b.onclick = () => {
+      state.stackAnswers[b.dataset.key] = b.dataset.val;
+      state.stackStep++;
+      renderStack();
     });
+  } else {
+    const cats  = USE_CASE_CATS[state.stackAnswers.usecase] || [];
+    const tools = BOOKMARKS.filter(b => {
+      const catMatch   = b.cat.some(c => cats.includes(c));
+      const priceMatch = state.stackAnswers.pricing === 'any' || b.pricing === 'free';
+      const levelMatch = state.stackAnswers.level === 'advanced' || !b.cat.includes('ragstack');
+      return catMatch && priceMatch && levelMatch;
+    }).slice(0, 6);
+
+    $('#stackBody').innerHTML = `
+      <div class="stack-step-label">${t().stackResult}</div>
+      <div class="stack-question" style="margin-bottom:14px">${tools.length} ${t().tools}</div>
+      ${tools.length === 0
+        ? `<p style="color:var(--text-muted);font-size:13px;font-family:var(--font-mono)">${t().stackEmpty}</p>`
+        : tools.map(b => `
+          <a class="stack-result-tool" href="${b.url}" target="_blank" rel="noopener noreferrer">
+            <img src="${favicon(b.url, 32)}" alt="" onerror="this.style.visibility='hidden'">
+            <div class="t-info">
+              <div class="t-name">${b.title}</div>
+              <div class="t-desc">${b.desc[state.lang]}</div>
+            </div>
+            <span class="t-arrow">↗</span>
+          </a>
+        `).join('')}
+      <button class="sub-action" id="stackRestart" style="margin-top:16px">↺ ${t().stackRestart}</button>
+    `;
+    $('#stackRestart').onclick = () => { state.stackStep = 0; state.stackAnswers = {}; renderStack(); };
+    $$('#stackProgress .step').forEach(el => el.classList.add('done'));
+  }
 }
 
-function initPricingFilter() {
-    const options = [
-        { val: 'all',      label: t().cat.all },
-        { val: 'free',     label: t().pricing.free },
-        { val: 'freemium', label: t().pricing.freemium },
-    ];
-    $('#pricingFilter').innerHTML = options.map(o =>
-        `<button class="pricing-btn${pricingFilter === o.val ? ' active' : ''}" data-pricing="${o.val}">${o.label}</button>`
-    ).join('') + `<button class="fav-toggle-btn${showFavorites ? ' active' : ''}" id="favToggleBtn">♥ ${t().favBtn}</button>`;
+$('#stackBtn').onclick     = openStack;
+$('#stackClose').onclick   = closeStack;
+$('#stackBackdrop').onclick = closeStack;
+$('#stackBack').onclick    = () => { if (state.stackStep > 0) { state.stackStep--; renderStack(); } };
 
-    $$('.pricing-btn').forEach(btn => btn.addEventListener('click', () => {
-        pricingFilter = btn.dataset.pricing;
-        $$('.pricing-btn').forEach(b => b.classList.toggle('active', b.dataset.pricing === pricingFilter));
-        render();
-    }));
-    $('#favToggleBtn').addEventListener('click', () => {
-        showFavorites = !showFavorites;
-        $('#favToggleBtn').classList.toggle('active', showFavorites);
-        render();
-    });
-}
+// =============================================
+// KEYBOARD SHORTCUTS
+// =============================================
+document.addEventListener('keydown', e => {
+  const stackOpen = $('#stackPanel').classList.contains('show');
 
-function initSortBar() {
-    const opts = ['default', 'az', 'newest', 'recommended'];
-    $('#sortBar').innerHTML = `<span class="sort-label">${t().sortLabel}</span>` +
-        opts.map(o => `<button class="sort-btn${sortOrder === o ? ' active' : ''}" data-sort="${o}">${t().sort[o]}</button>`).join('');
-    $$('.sort-btn').forEach(btn => btn.addEventListener('click', () => {
-        sortOrder = btn.dataset.sort;
-        $$('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === sortOrder));
-        render();
-    }));
-}
-
-function initCategories() {
-    const cats = ['all', ...CATEGORIES];
-    $('#categories').innerHTML = cats.map(c =>
-        `<button class="category-btn${c === 'all' ? ' active' : ''}" data-category="${c}">${t().cat[c]}<span class="cat-count">${catCount(c)}</span></button>`
-    ).join('');
-    $$('.category-btn').forEach(btn => btn.addEventListener('click', () => filterByCategory(btn.dataset.category)));
-}
-
-$('#searchInput').addEventListener('input', e => { search = e.target.value.toLowerCase(); render(); });
-
-$$('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
-    $$('.lang-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    lang = btn.dataset.lang;
-    localStorage.setItem('lang', lang);
-    initCategories();
-    updateUI();
-}));
-
-// Sugerentzixen botoie
-$('#suggestBtn').addEventListener('click', () => {
-    const titles = {
-        es: 'Sugerir: [Nombre de la herramienta]',
-        en: 'Suggest: [Tool name]',
-        eu: 'Iradoki: [Tresnaren izena]'
-    };
-    const bodies = {
-        es: `## Herramienta sugerida
-
-**Nombre:**
-
-**URL:**
-
-**Categoría:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
-
-**Precio:** (free / freemium)
-
-**Descripción corta:**
-
----
-Gracias por tu sugerencia! 🙌`,
-        en: `## Suggested tool
-
-**Name:**
-
-**URL:**
-
-**Category:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
-
-**Pricing:** (free / freemium)
-
-**Short description:**
-
----
-Thanks for your suggestion! 🙌`,
-        eu: `## Iradokitako tresna
-
-**Izena:**
-
-**URL:**
-
-**Kategoria:** (general, code, webdev, image, music, video, voice, humanizer, allinone, presentations, travel, automation, ragstack, privacy)
-
-**Prezioa:** (free / freemium)
-
-**Deskribapen laburra:**
-
----
-Eskerrik asko zure iradokizunagatik! 🙌`
-    };
-    const title = encodeURIComponent(titles[lang]);
-    const body = encodeURIComponent(bodies[lang]);
-    window.open(`https://github.com/iamLudok/ai-bookmarks/issues/new?title=${title}&body=${body}&labels=suggestion`, '_blank');
+  if (e.key === 'Escape') {
+    if (stackOpen) { closeStack(); return; }
+    if (screensaverActive) { stopScreensaver(); return; }
+    if (state.search) {
+      state.search = '';
+      $('#searchInput').value = '';
+      renderGrid();
+      renderCounter();
+      renderActiveFilters();
+    }
+  }
 });
 
 // =============================================
 // SCREENSAVER
 // =============================================
-let inactivityTimer = null;
+let inactivityTimer  = null;
 let screensaverActive = false;
-let screensaverRAF = null;
+let screensaverRAF   = null;
 
 function startScreensaver() {
-    screensaverActive = true;
-    const el = $('#screensaver');
-    el.style.display = 'block';
+  screensaverActive = true;
+  const el = $('#screensaver');
+  el.style.display = 'block';
 
-    const logos = bookmarks.map(b => {
-        const img = document.createElement('img');
-        img.src = `https://www.google.com/s2/favicons?domain=${new URL(b.url).hostname}&sz=64`;
-        img.className = 'screensaver-logo';
-        img.alt = b.title;
-        const size = 40;
-        const x = Math.random() * (window.innerWidth - size);
-        const y = Math.random() * (window.innerHeight - size);
-        const speed = 1.2 + Math.random() * 1.2;
-        const angle = Math.random() * 2 * Math.PI;
-        img._x = x; img._y = y;
-        img._vx = Math.cos(angle) * speed;
-        img._vy = Math.sin(angle) * speed;
-        img._size = size;
-        img.style.cssText = `left:${x}px;top:${y}px;`;
-        el.appendChild(img);
-        return img;
+  const logos = BOOKMARKS.map(b => {
+    const img = document.createElement('img');
+    img.src = favicon(b.url);
+    img.className = 'screensaver-logo';
+    img.alt = b.title;
+    const size = 40;
+    const x = Math.random() * (window.innerWidth - size);
+    const y = Math.random() * (window.innerHeight - size);
+    const speed = 1.2 + Math.random() * 1.2;
+    const angle = Math.random() * 2 * Math.PI;
+    img._x = x; img._y = y;
+    img._vx = Math.cos(angle) * speed;
+    img._vy = Math.sin(angle) * speed;
+    img._size = size;
+    img.style.cssText = `left:${x}px;top:${y}px;`;
+    el.appendChild(img);
+    return img;
+  });
+
+  function animate() {
+    if (!screensaverActive) return;
+    const W = window.innerWidth, H = window.innerHeight;
+    logos.forEach(img => {
+      img._x += img._vx;
+      img._y += img._vy;
+      if (img._x <= 0 || img._x + img._size >= W) { img._vx *= -1; img._x = Math.max(0, Math.min(W - img._size, img._x)); }
+      if (img._y <= 0 || img._y + img._size >= H) { img._vy *= -1; img._y = Math.max(0, Math.min(H - img._size, img._y)); }
+      img.style.left = img._x + 'px';
+      img.style.top  = img._y + 'px';
     });
-
-    function animate() {
-        if (!screensaverActive) return;
-        const W = window.innerWidth, H = window.innerHeight;
-        logos.forEach(img => {
-            img._x += img._vx;
-            img._y += img._vy;
-            if (img._x <= 0 || img._x + img._size >= W) { img._vx *= -1; img._x = Math.max(0, Math.min(W - img._size, img._x)); }
-            if (img._y <= 0 || img._y + img._size >= H) { img._vy *= -1; img._y = Math.max(0, Math.min(H - img._size, img._y)); }
-            img.style.left = img._x + 'px';
-            img.style.top  = img._y + 'px';
-        });
-        screensaverRAF = requestAnimationFrame(animate);
-    }
-    animate();
+    screensaverRAF = requestAnimationFrame(animate);
+  }
+  animate();
 }
 
 function stopScreensaver() {
-    if (!screensaverActive) return;
-    screensaverActive = false;
-    cancelAnimationFrame(screensaverRAF);
-    const el = $('#screensaver');
-    el.style.display = 'none';
-    el.querySelectorAll('img').forEach(img => img.remove());
+  if (!screensaverActive) return;
+  screensaverActive = false;
+  cancelAnimationFrame(screensaverRAF);
+  const el = $('#screensaver');
+  el.style.display = 'none';
+  el.querySelectorAll('img').forEach(img => img.remove());
 }
 
 function resetInactivity() {
-    if (screensaverActive) { stopScreensaver(); return; }
-    clearTimeout(inactivityTimer);
-    if (!$('#stackModal').classList.contains('show')) {
-        inactivityTimer = setTimeout(startScreensaver, 30000);
-    }
+  if (screensaverActive) { stopScreensaver(); return; }
+  clearTimeout(inactivityTimer);
+  if (!$('#stackPanel').classList.contains('show')) {
+    inactivityTimer = setTimeout(startScreensaver, 300000);
+  }
 }
 
 ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt =>
-    document.addEventListener(evt, resetInactivity, { passive: true })
+  document.addEventListener(evt, resetInactivity, { passive: true })
 );
+
+
+// =============================================
+// INIT
+// =============================================
+$$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.lang));
 resetInactivity();
-
-// =============================================
-// STACK BUILDER
-// =============================================
-const STACK_Q = {
-    es: {
-        steps: [
-            { key: 'usecase', label: '¿Qué quieres hacer?', opts: [
-                { val: 'content',  label: 'Crear contenido (video, imagen, música)' },
-                { val: 'code',     label: 'Programar o hacer webs' },
-                { val: 'automate', label: 'Automatizar tareas' },
-                { val: 'research', label: 'Investigar o aprender' },
-                { val: 'present',  label: 'Crear presentaciones' },
-                { val: 'travel',   label: 'Planificar viajes' },
-                { val: 'privacy',  label: 'Proteger mi privacidad' },
-            ]},
-            { key: 'pricing', label: '¿Qué precio te va?', opts: [
-                { val: 'free', label: 'Solo herramientas gratuitas' },
-                { val: 'any',  label: 'Freemium también me vale' },
-            ]},
-            { key: 'level', label: '¿Cuánto sabes de tecnología?', opts: [
-                { val: 'basic',    label: 'Lo básico' },
-                { val: 'advanced', label: 'Me manejo bien' },
-            ]},
-        ],
-        result: 'tu stack:',
-        reset: 'empezar de nuevo', notools: 'Ninguna herramienta coincide con los filtros.',
-    },
-    en: {
-        steps: [
-            { key: 'usecase', label: 'What do you want to do?', opts: [
-                { val: 'content',  label: 'Create content (video, image, music)' },
-                { val: 'code',     label: 'Code or build websites' },
-                { val: 'automate', label: 'Automate tasks' },
-                { val: 'research', label: 'Research or learn' },
-                { val: 'present',  label: 'Create presentations' },
-                { val: 'travel',   label: 'Plan trips' },
-                { val: 'privacy',  label: 'Protect my privacy' },
-            ]},
-            { key: 'pricing', label: 'What pricing works for you?', opts: [
-                { val: 'free', label: 'Free tools only' },
-                { val: 'any',  label: 'Freemium is fine too' },
-            ]},
-            { key: 'level', label: 'How tech-savvy are you?', opts: [
-                { val: 'basic',    label: 'Basic level' },
-                { val: 'advanced', label: 'Pretty comfortable' },
-            ]},
-        ],
-        result: 'your stack:',
-        reset: 'start over', notools: 'No tools match your filters.',
-    },
-    eu: {
-        steps: [
-            { key: 'usecase', label: 'Zer egin nahi duzu?', opts: [
-                { val: 'content',  label: 'Edukia sortu (bideoa, irudia, musika)' },
-                { val: 'code',     label: 'Programatu edo webak eraiki' },
-                { val: 'automate', label: 'Atazak automatizatu' },
-                { val: 'research', label: 'Ikertu edo ikasi' },
-                { val: 'present',  label: 'Aurkezpenak sortu' },
-                { val: 'travel',   label: 'Bidaiak planifikatu' },
-                { val: 'privacy',  label: 'Nire pribatutasuna babestu' },
-            ]},
-            { key: 'pricing', label: 'Zer prezio nahiago duzu?', opts: [
-                { val: 'free', label: 'Tresna doakoak soilik' },
-                { val: 'any',  label: 'Freemium ere ondo' },
-            ]},
-            { key: 'level', label: 'Zenbat dakizu teknologiaz?', opts: [
-                { val: 'basic',    label: 'Oinarrizko maila' },
-                { val: 'advanced', label: 'Ondo moldatzen naiz' },
-            ]},
-        ],
-        result: 'zure stack-a:',
-        reset: 'berriro hasi', notools: 'Ez dago filtro guztiak betetzen dituen tresnarik.',
-    },
-};
-
-const USE_CASE_CATS = {
-    content:  ['image', 'video', 'music', 'voice'],
-    code:     ['code', 'webdev'],
-    automate: ['automation', 'ragstack'],
-    research: ['general', 'allinone'],
-    present:  ['presentations'],
-    travel:   ['travel'],
-    privacy:  ['privacy'],
-};
-
-let stackAnswers = {};
-
-function getStackRecommendations() {
-    const cats = USE_CASE_CATS[stackAnswers.usecase] || [];
-    return bookmarks.filter(b => {
-        const catMatch  = b.cat.some(c => cats.includes(c));
-        const priceMatch = stackAnswers.pricing === 'any' || b.pricing === 'free';
-        const levelMatch = stackAnswers.level === 'advanced' || !b.cat.includes('ragstack');
-        return catMatch && priceMatch && levelMatch;
-    }).slice(0, 4);
-}
-
-function renderStack() {
-    const body  = $('#stackBody');
-    const q     = STACK_Q[lang];
-    let html    = '';
-
-    for (const step of q.steps) {
-        html += `<p class="stack-prompt">&gt; ${step.label}</p>`;
-        if (stackAnswers[step.key]) {
-            const chosen = step.opts.find(o => o.val === stackAnswers[step.key]);
-            html += `<p class="stack-answer">${chosen.label}</p>`;
-        } else {
-            html += `<div class="stack-options">`;
-            step.opts.forEach(o => {
-                html += `<button class="stack-option" data-key="${step.key}" data-val="${o.val}">${o.label}</button>`;
-            });
-            html += `</div>`;
-            body.innerHTML = html;
-            $$('.stack-option').forEach(btn => btn.addEventListener('click', () => {
-                stackAnswers[btn.dataset.key] = btn.dataset.val;
-                renderStack();
-                body.scrollTop = body.scrollHeight;
-            }));
-            return;
-        }
-    }
-
-    // All answered → show results
-    const tools = getStackRecommendations();
-    html += `<p class="stack-prompt">&gt; ${q.result}</p>`;
-    if (tools.length) {
-        tools.forEach(tb => {
-            html += `
-            <a href="${tb.url}" target="_blank" rel="noopener noreferrer" class="stack-tool">
-                <img src="https://www.google.com/s2/favicons?domain=${new URL(tb.url).hostname}&sz=32" class="stack-tool-logo" alt="${tb.title}">
-                <div class="stack-tool-info">
-                    <span class="stack-tool-name">${tb.title}</span>
-                    <span class="stack-tool-desc">${tb.desc[lang]}</span>
-                </div>
-                <span class="stack-tool-visit">${t().visit} →</span>
-            </a>`;
-        });
-    } else {
-        html += `<p class="stack-no-tools">${q.notools}</p>`;
-    }
-    html += `<button class="stack-reset-btn" id="stackResetBtn">&gt; ${q.reset}</button>`;
-    body.innerHTML = html;
-    body.scrollTop = body.scrollHeight;
-
-    $('#stackResetBtn').addEventListener('click', () => { stackAnswers = {}; renderStack(); });
-}
-
-$('#stackBtn').addEventListener('click', () => {
-    stackAnswers = {};
-    renderStack();
-    $('#stackModal').classList.add('show');
-    resetInactivity();
-});
-$('#stackClose').addEventListener('click', () => $('#stackModal').classList.remove('show'));
-$('#stackModal').addEventListener('click', e => { if (e.target === $('#stackModal')) $('#stackModal').classList.remove('show'); });
-
-document.addEventListener('keydown', e => {
-    const input = $('#searchInput');
-    if (e.key === 'Escape') {
-        if ($('#stackModal').classList.contains('show')) { $('#stackModal').classList.remove('show'); return; }
-        if (document.activeElement === input) { input.value = ''; search = ''; input.blur(); render(); }
-    }
-    if (e.key === '/' && document.activeElement !== input && !$('#stackModal').classList.contains('show')) {
-        e.preventDefault();
-        input.focus();
-    }
-});
-
-$('#bookmarksGrid').addEventListener('click', e => {
-    const cat     = e.target.closest('.bookmark-category');
-    const pricing = e.target.closest('.bookmark-pricing');
-    const fav     = e.target.closest('.bookmark-fav');
-    if (cat) { filterByCategory(cat.dataset.cat); return; }
-    if (pricing) {
-        pricingFilter = pricing.dataset.pricing;
-        $$('.pricing-btn').forEach(b => b.classList.toggle('active', b.dataset.pricing === pricingFilter));
-        render();
-        return;
-    }
-    if (fav) {
-        e.preventDefault();
-        toggleFavorite(fav.dataset.url);
-    }
-});
-
-$$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-initCategories();
-updateUI();
+render();
